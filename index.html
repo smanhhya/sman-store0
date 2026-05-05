@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -78,7 +77,7 @@
         </div>
     </nav>
 
-    <!-- شريط السلة السفلي -->
+    <!-- شريط السلة السفلي (يظهر عند الطلب) -->
     <div id="bottom-cart-bar" class="fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 shadow-[0_-10px_20px_rgba(0,0,0,0.08)] p-4 flex justify-between items-center z-40 transform translate-y-full transition-transform duration-300">
         <div class="flex flex-col">
             <span class="text-xs text-gray-500 font-bold">الإجمالي (بدون التوصيل)</span>
@@ -210,13 +209,13 @@
             <h2 class="text-xl md:text-2xl font-black text-brand-navy mb-6 border-r-4 border-brand-cyanDark pr-3">أطباق السمان المجهزة</h2>
             
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-10" id="products-container">
-                <div class="col-span-full text-center py-10 text-brand-cyanDark">
-                    <i class="fa-solid fa-spinner fa-spin text-3xl mb-3"></i><p class="font-bold text-sm">جاري تحميل المنيو...</p>
-                </div>
+                <!-- المنتجات هتترسم هنا -->
             </div>
 
             <h2 class="text-xl md:text-2xl font-black text-brand-navy mb-6 mt-12 border-r-4 border-brand-yellow pr-3">منتجات المزرعة</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="extras-container"></div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="extras-container">
+                <!-- المنتجات الإضافية هتترسم هنا -->
+            </div>
         </div>
     </section>
 
@@ -240,8 +239,7 @@
 
     <!-- JavaScript Logic -->
     <script>
-        // هنا تم تظبيط الصور على الأسماء اللي إنت رافعها بالفعل عشان الموقع يشتغل فوراً وبشكل احترافي
-        // لو حبيت تزود صور تانية لنفس الطبق، مجرد حط فاصلة وضيف اسم الصورة التانية زي كده: ['super.jpg', 'super2.jpg']
+        // تعريف المنتجات والصور المتاحة حالياً
         const productsInfo = {
             'super': { name: 'طبق سوبر (الذهبي)', price: 100, weight: '300-350 جم', images: ['super.jpg'], isExtra: false },
             'jumbo': { name: 'طبق جامبو (الملوكي)', price: 110, weight: '350-400 جم', images: ['jumbo.jpg'], isExtra: false },
@@ -259,37 +257,58 @@
         let db = null;
         let hasCloud = false;
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyD7ZJP8n8fhMewPfEsTBANn0h9To_q15BY",
-            authDomain: "sman-ca8f8.firebaseapp.com",
-            projectId: "sman-ca8f8",
-            storageBucket: "sman-ca8f8.firebasestorage.app",
-            messagingSenderId: "538778803310",
-            appId: "1:538778803310:web:5eeff42bae534375a21a7f"
-        };
+        // تأمين الأحداث وتحديث الواجهة
+        document.addEventListener('DOMContentLoaded', () => {
+            renderProducts(); // رسم الموقع فوراً عشان ميهنجش
+            setupEventListeners();
+            initFirebase();
+        });
 
-        try {
-            firebase.initializeApp(firebaseConfig);
-            const auth = firebase.auth();
-            db = firebase.firestore();
+        function setupEventListeners() {
+            const custNameInput = document.getElementById('customer-name');
+            const delZoneInput = document.getElementById('delivery-zone');
+            if (custNameInput) custNameInput.addEventListener('input', updateUI);
+            if (delZoneInput) delZoneInput.addEventListener('change', updateUI);
+        }
 
-            auth.signInAnonymously().catch(() => renderProducts());
-            auth.onAuthStateChanged(user => {
-                if(user) { hasCloud = true; listenToStock(); } 
-                else { renderProducts(); }
-            });
-        } catch (e) { renderProducts(); }
+        function initFirebase() {
+            const firebaseConfig = {
+                apiKey: "AIzaSyD7ZJP8n8fhMewPfEsTBANn0h9To_q15BY",
+                authDomain: "sman-ca8f8.firebaseapp.com",
+                projectId: "sman-ca8f8",
+                storageBucket: "sman-ca8f8.firebasestorage.app",
+                messagingSenderId: "538778803310",
+                appId: "1:538778803310:web:5eeff42bae534375a21a7f"
+            };
+
+            try {
+                firebase.initializeApp(firebaseConfig);
+                const auth = firebase.auth();
+                db = firebase.firestore();
+
+                auth.signInAnonymously().catch((e) => console.log("Auth error", e));
+                auth.onAuthStateChanged(user => {
+                    if(user) { hasCloud = true; listenToStock(); } 
+                });
+            } catch (e) { 
+                console.log("Firebase init error", e); 
+            }
+        }
 
         function listenToStock() {
+            if(!db) return;
             const docRef = db.collection('inventory').doc('stock');
             docRef.onSnapshot(snapshot => {
                 if (snapshot.exists) {
                     const data = snapshot.data();
                     for(let id in globalStock) if(data[id] !== undefined) globalStock[id] = data[id];
                 }
-                updateConnectionStatus(true); renderProducts(); updateUI();
+                updateConnectionStatus(true); 
+                renderProducts(); 
+                updateUI();
             }, error => {
-                hasCloud = false; updateConnectionStatus(false); renderProducts(); 
+                hasCloud = false; 
+                updateConnectionStatus(false); 
             });
         }
 
@@ -312,7 +331,10 @@
             const totalImages = images.length;
             if (direction === 'next') currentImageIndex[id] = (currentImageIndex[id] + 1) % totalImages;
             else currentImageIndex[id] = (currentImageIndex[id] - 1 + totalImages) % totalImages;
-            document.getElementById(`img-${id}`).src = images[currentImageIndex[id]];
+            
+            const imgElement = document.getElementById(`img-${id}`);
+            if(imgElement) imgElement.src = images[currentImageIndex[id]];
+            
             updateDots(id);
         };
 
@@ -328,7 +350,9 @@
 
         window.getCardActionHTML = function(id, isOutOfStock) {
             const inCart = cart[id] ? cart[id].quantity : 0;
-            if (isOutOfStock && inCart === 0) return `<button disabled class="w-full bg-gray-100 text-gray-400 font-bold py-2.5 rounded-xl text-sm border border-gray-200">نفدت الكمية</button>`;
+            if (isOutOfStock && inCart === 0) {
+                return `<button disabled class="w-full bg-gray-100 text-gray-400 font-bold py-2.5 rounded-xl text-sm border border-gray-200">نفدت الكمية</button>`;
+            }
             if (inCart > 0) {
                 return `
                 <div class="flex items-center justify-between bg-brand-light/50 border border-brand-cyan/40 rounded-xl p-1 h-[42px]">
@@ -344,23 +368,29 @@
             const container = document.getElementById('products-container');
             const extrasContainer = document.getElementById('extras-container');
             
-            if (container.children.length > 1 && !container.innerHTML.includes('جاري')) {
+            if(!container || !extrasContainer) return;
+
+            // لو الكروت مرسومة، هنحدث الأرقام بس عشان الصور مترمش
+            if (container.children.length > 0) {
                 Object.keys(productsInfo).forEach(id => {
                     const stock = globalStock[id];
                     const isOutOfStock = stock === 0;
+                    
                     const stockDisplay = document.getElementById(`stock-display-${id}`);
                     if(stockDisplay) {
                         stockDisplay.innerText = stock;
                         const badge = document.getElementById(`stock-badge-${id}`);
                         if(badge) badge.className = `text-xs font-bold px-2 py-1 rounded-md flex items-center gap-1 border ${stock <= 10 ? (stock === 0 ? 'bg-red-50 text-red-600 border-red-200' : 'bg-orange-50 text-orange-600 border-orange-200') : 'bg-green-50 text-green-700 border-green-200'}`;
                     }
+                    
                     const actionContainer = document.getElementById(`card-action-${id}`);
                     if(actionContainer) actionContainer.innerHTML = getCardActionHTML(id, isOutOfStock);
                 });
                 return;
             }
 
-            container.innerHTML = ''; extrasContainer.innerHTML = '';
+            container.innerHTML = ''; 
+            extrasContainer.innerHTML = '';
 
             Object.keys(productsInfo).forEach(id => {
                 const item = productsInfo[id];
@@ -381,8 +411,8 @@
                 if (!item.isExtra) {
                     const cardHtml = `
                     <div class="bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow border border-gray-200 overflow-hidden flex flex-col h-full relative group">
-                        <div class="h-44 overflow-hidden relative bg-gray-50 border-b border-gray-100">
-                            <img id="img-${id}" src="${item.images[currentImageIndex[id]]}" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'100\\' height=\\'100\\'><rect width=\\'100%\\' height=\\'100%\\' fill=\\'%23f8fafc\\'/><text x=\\'50%\\' y=\\'50%\\' font-size=\\'12\\' font-weight=\\'bold\\' text-anchor=\\'middle\\' fill=\\'%2394a3b8\\'>لا توجد صورة</text></svg>'" class="w-full h-full object-cover transition-transform duration-300">
+                        <div class="h-44 w-full relative bg-gray-50 border-b border-gray-100 overflow-hidden">
+                            <img id="img-${id}" src="${item.images[currentImageIndex[id]]}" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'100\\' height=\\'100\\'><rect width=\\'100%\\' height=\\'100%\\' fill=\\'%23f8fafc\\'/><text x=\\'50%\\' y=\\'50%\\' font-size=\\'12\\' font-weight=\\'bold\\' text-anchor=\\'middle\\' fill=\\'%2394a3b8\\'>صورة الطبق</text></svg>'" class="w-full h-full object-cover transition-transform duration-300">
                             ${sliderControlsHTML}
                         </div>
                         <div class="p-4 flex-1 flex flex-col bg-white">
@@ -407,8 +437,8 @@
                 } else {
                     const extraHtml = `
                     <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden flex items-center p-2.5 gap-3">
-                        <div class="w-20 h-20 shrink-0 relative">
-                            <img id="img-${id}" src="${item.images[currentImageIndex[id]]}" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'100\\' height=\\'100\\'><rect width=\\'100%\\' height=\\'100%\\' fill=\\'%23f8fafc\\'/><text x=\\'50%\\' y=\\'50%\\' font-size=\\'10\\' text-anchor=\\'middle\\' fill=\\'%2394a3b8\\'>قريباً</text></svg>'" class="w-full h-full rounded-xl object-cover border border-gray-100">
+                        <div class="w-20 h-20 shrink-0 relative overflow-hidden rounded-xl border border-gray-100">
+                            <img id="img-${id}" src="${item.images[currentImageIndex[id]]}" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'100\\' height=\\'100\\'><rect width=\\'100%\\' height=\\'100%\\' fill=\\'%23f8fafc\\'/><text x=\\'50%\\' y=\\'50%\\' font-size=\\'10\\' text-anchor=\\'middle\\' fill=\\'%2394a3b8\\'>قريباً</text></svg>'" class="w-full h-full object-cover">
                         </div>
                         <div class="flex-1 min-w-0">
                             <h4 class="font-black text-brand-navy text-sm truncate">${item.name}</h4>
@@ -432,8 +462,11 @@
             if (currentStock > inCart) {
                 if (cart[id]) cart[id].quantity++;
                 else cart[id] = { quantity: 1, price: productsInfo[id].price, name: productsInfo[id].name };
-                updateUI(); renderProducts(); 
-            } else showAlert("عذراً", "الكمية المتاحة لا تكفي حالياً.");
+                updateUI(); 
+                renderProducts(); 
+            } else {
+                showAlert("عذراً", "الكمية المتاحة لا تكفي حالياً.");
+            }
         };
 
         window.updateQuantity = function(id, delta) {
@@ -445,15 +478,15 @@
                 if (cart[id].quantity > 1) cart[id].quantity--;
                 else delete cart[id];
             }
-            updateUI(); renderProducts(); 
+            updateUI(); 
+            renderProducts(); 
         };
-
-        document.getElementById('customer-name').addEventListener('input', updateUI);
-        document.getElementById('delivery-zone').addEventListener('change', updateUI);
 
         window.updateUI = function() {
             let totalItems = 0, subTotalPrice = 0;
             const cartItemsContainer = document.getElementById('cart-items');
+            if(!cartItemsContainer) return;
+            
             cartItemsContainer.innerHTML = '';
             
             for (let id in cart) {
@@ -476,35 +509,66 @@
             }
 
             const bottomBar = document.getElementById('bottom-cart-bar');
-            document.getElementById('bottom-cart-total').innerText = subTotalPrice;
-            document.getElementById('bottom-cart-count').innerText = totalItems;
+            if(bottomBar) {
+                document.getElementById('bottom-cart-total').innerText = subTotalPrice;
+                document.getElementById('bottom-cart-count').innerText = totalItems;
 
-            if (totalItems > 0) bottomBar.classList.remove('translate-y-full');
-            else {
-                bottomBar.classList.add('translate-y-full');
-                cartItemsContainer.innerHTML = `<div class="flex flex-col items-center justify-center py-10 text-gray-400 gap-3"><i class="fa-solid fa-basket-shopping text-5xl text-gray-200"></i><p class="font-bold text-sm">لم تقم باختيار أي أطباق</p></div>`;
+                if (totalItems > 0) {
+                    bottomBar.classList.remove('translate-y-full');
+                } else {
+                    bottomBar.classList.add('translate-y-full');
+                    cartItemsContainer.innerHTML = `<div class="flex flex-col items-center justify-center py-10 text-gray-400 gap-3"><i class="fa-solid fa-basket-shopping text-5xl text-gray-200"></i><p class="font-bold text-sm">لم تقم باختيار أي أطباق</p></div>`;
+                }
             }
 
             const deliverySelect = document.getElementById('delivery-zone');
-            const deliveryFee = parseInt(deliverySelect.value) || 0;
+            const deliveryFee = deliverySelect ? (parseInt(deliverySelect.value) || 0) : 0;
             const finalTotal = subTotalPrice + deliveryFee;
 
-            document.getElementById('cart-subtotal').innerText = subTotalPrice;
-            document.getElementById('cart-delivery-fee').innerText = deliveryFee;
-            document.getElementById('cart-total').innerText = finalTotal;
+            const subTotalEl = document.getElementById('cart-subtotal');
+            const delFeeEl = document.getElementById('cart-delivery-fee');
+            const totalEl = document.getElementById('cart-total');
+            
+            if(subTotalEl) subTotalEl.innerText = subTotalPrice;
+            if(delFeeEl) delFeeEl.innerText = deliveryFee;
+            if(totalEl) totalEl.innerText = finalTotal;
 
             const checkoutBtn = document.getElementById('checkout-btn');
             const checkoutHint = document.getElementById('checkout-hint');
-            const customerName = document.getElementById('customer-name').value.trim();
+            const customerNameInput = document.getElementById('customer-name');
+            const customerName = customerNameInput ? customerNameInput.value.trim() : "";
             
-            if (totalItems > 0) {
-                if (deliverySelect.value === "" || customerName === "") {
-                    checkoutBtn.disabled = true; checkoutHint.classList.remove('hidden');
+            if (checkoutBtn && checkoutHint) {
+                if (totalItems > 0) {
+                    if (!deliverySelect || deliverySelect.value === "" || customerName === "") {
+                        checkoutBtn.disabled = true; 
+                        checkoutHint.classList.remove('hidden');
+                    } else {
+                        checkoutBtn.disabled = false; 
+                        checkoutHint.classList.add('hidden');
+                    }
                 } else {
-                    checkoutBtn.disabled = false; checkoutHint.classList.add('hidden');
+                    checkoutBtn.disabled = true; 
+                    checkoutHint.classList.add('hidden');
                 }
+            }
+        };
+
+        window.toggleCart = function() {
+            const sidebar = document.getElementById('cart-sidebar');
+            const overlay = document.getElementById('cart-overlay');
+            if(!sidebar || !overlay) return;
+
+            if (sidebar.classList.contains('translate-x-full')) {
+                sidebar.classList.remove('translate-x-full'); 
+                overlay.classList.remove('hidden');
+                setTimeout(() => overlay.classList.remove('opacity-0'), 10); 
+                document.body.style.overflow = 'hidden';
             } else {
-                checkoutBtn.disabled = true; checkoutHint.classList.add('hidden');
+                sidebar.classList.add('translate-x-full'); 
+                overlay.classList.add('opacity-0');
+                setTimeout(() => overlay.classList.add('hidden'), 300); 
+                document.body.style.overflow = '';
             }
         };
 
@@ -520,9 +584,7 @@
                 return;
             }
 
-            // ==========================================
-            // المفتاح السري لبرنامج TickTick تم وضعه هنا بنجاح
-            // ==========================================
+            // الكود السري بتاع Web3Forms لربط تيك تيك
             const web3FormsKey = "d8e4b3fe-018c-4c39-b15f-191ccc7cf10c"; 
             
             let subTotal = 0;
@@ -558,17 +620,13 @@
             checkoutBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-2xl"></i> جاري تسجيل الطلب...';
 
             try {
-                // إرسال الطلب لـ TickTick باستخدام Web3Forms
                 await fetch('https://api.web3forms.com/submit', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
                     body: JSON.stringify({
                         access_key: web3FormsKey,
                         subject: `أوردر جديد 🛒: ${customerName} - ${zoneName}`,
-                        "تفاصيل_الطلب": orderDetailsForTickTick
+                        "التفاصيل": orderDetailsForTickTick
                     })
                 });
             } catch(e) { 
@@ -584,39 +642,39 @@
             toggleCart();
             checkoutBtn.innerHTML = originalBtnHtml; 
 
-            // فتح الواتساب لرقمك
             window.location.href = `https://api.whatsapp.com/send?phone=201208027294&text=${encodeURIComponent(message)}`;
         };
 
-        window.toggleCart = function() {
-            const sidebar = document.getElementById('cart-sidebar'), overlay = document.getElementById('cart-overlay');
-            if (sidebar.classList.contains('translate-x-full')) {
-                sidebar.classList.remove('translate-x-full'); overlay.classList.remove('hidden');
-                setTimeout(() => overlay.classList.remove('opacity-0'), 10); document.body.style.overflow = 'hidden';
-            } else {
-                sidebar.classList.add('translate-x-full'); overlay.classList.add('opacity-0');
-                setTimeout(() => overlay.classList.add('hidden'), 300); document.body.style.overflow = '';
-            }
-        };
-
         window.showAlert = function(title, message) {
-            document.getElementById('alert-title').innerText = title; document.getElementById('alert-message').innerText = message;
-            const modal = document.getElementById('alert-modal'), box = document.getElementById('alert-box');
+            document.getElementById('alert-title').innerText = title; 
+            document.getElementById('alert-message').innerText = message;
+            const modal = document.getElementById('alert-modal');
+            const box = document.getElementById('alert-box');
+            if(!modal || !box) return;
             modal.classList.remove('hidden');
             setTimeout(() => { modal.classList.remove('opacity-0'); box.classList.remove('scale-95'); box.classList.add('scale-100'); }, 10);
         };
         window.closeAlert = function() {
-            const modal = document.getElementById('alert-modal'), box = document.getElementById('alert-box');
-            modal.classList.add('opacity-0'); box.classList.remove('scale-100'); box.classList.add('scale-95');
+            const modal = document.getElementById('alert-modal');
+            const box = document.getElementById('alert-box');
+            if(!modal || !box) return;
+            modal.classList.add('opacity-0'); 
+            box.classList.remove('scale-100'); 
+            box.classList.add('scale-95');
             setTimeout(() => modal.classList.add('hidden'), 300);
         };
 
         window.openAdminLogin = function() {
-            const modal = document.getElementById('admin-login-modal'); modal.classList.remove('hidden');
-            setTimeout(() => modal.classList.remove('opacity-0'), 10); document.getElementById('admin-pin').value = '';
+            const modal = document.getElementById('admin-login-modal'); 
+            if(!modal) return;
+            modal.classList.remove('hidden');
+            setTimeout(() => modal.classList.remove('opacity-0'), 10); 
+            document.getElementById('admin-pin').value = '';
         };
         window.closeAdminLogin = function() {
-            const modal = document.getElementById('admin-login-modal'); modal.classList.add('opacity-0');
+            const modal = document.getElementById('admin-login-modal'); 
+            if(!modal) return;
+            modal.classList.add('opacity-0');
             setTimeout(() => modal.classList.add('hidden'), 300);
         };
         window.verifyAdminPin = function() {
@@ -624,7 +682,9 @@
             else showAlert("خطأ", "الرمز السري غير صحيح!");
         };
         window.openAdminDashboard = function() {
-            const container = document.getElementById('admin-inputs-container'); container.innerHTML = '';
+            const container = document.getElementById('admin-inputs-container'); 
+            if(!container) return;
+            container.innerHTML = '';
             Object.keys(productsInfo).forEach(id => {
                 container.innerHTML += `
                     <div class="flex justify-between items-center bg-gray-50 p-3 rounded-xl border border-gray-200">
@@ -632,11 +692,14 @@
                         <div class="flex items-center gap-2"><input type="number" id="admin-input-${id}" value="${globalStock[id]}" class="w-16 text-center border border-gray-300 rounded-lg p-1.5 font-black text-brand-cyanDark focus:border-brand-cyan outline-none"></div>
                     </div>`;
             });
-            const modal = document.getElementById('admin-dashboard-modal'); modal.classList.remove('hidden');
+            const modal = document.getElementById('admin-dashboard-modal'); 
+            modal.classList.remove('hidden');
             setTimeout(() => modal.classList.remove('opacity-0'), 10);
         };
         window.closeAdminDashboard = function() {
-            const modal = document.getElementById('admin-dashboard-modal'); modal.classList.add('opacity-0');
+            const modal = document.getElementById('admin-dashboard-modal'); 
+            if(!modal) return;
+            modal.classList.add('opacity-0');
             setTimeout(() => modal.classList.add('hidden'), 300);
         };
         window.saveStockToCloud = async function() {
@@ -664,3 +727,4 @@
 
 
 ```
+
