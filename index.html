@@ -1015,30 +1015,6 @@
     }
 };
 
-
-                const data = await response.json();
-                
-                if (!response.ok || data.error) {
-                    console.log("الخطأ من جوجل:", data.error);
-                    throw new Error('API Error');
-                }
-
-                const botReply = data.candidates[0].content.parts[0].text;
-                
-                typingIndicator.classList.add('hidden');
-                appendMessage('bot', botReply);
-                
-                chatHistory.push({ role: 'user', content: message });
-                chatHistory.push({ role: 'model', content: botReply });
-
-            } catch (error) {
-                console.error(error);
-                typingIndicator.classList.add('hidden');
-                appendMessage('bot', 'عذراً يا فندم، في ضغط على السيرفر دلوقتي.. حاول تاني كمان شوية.');
-            }
-        };
-
-
         function appendMessage(sender, text) {
             const chatBody = document.getElementById('chat-body');
             const typingIndicator = document.getElementById('chat-typing');
