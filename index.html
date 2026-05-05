@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -5,18 +6,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>سمان ههيا | صحي وطازة</title>
     
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Google Fonts: Cairo -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
     
-    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <!-- Tailwind Config -->
     <script>
         tailwind.config = {
             theme: {
@@ -59,13 +56,11 @@
 </head>
 <body class="bg-gray-50 text-gray-800 antialiased selection:bg-brand-navy selection:text-white">
 
-    <!-- شريط الإعلان -->
     <div class="bg-red-600 text-white text-center py-2 font-black text-sm md:text-base z-40 relative shadow-sm">
         <i class="fa-solid fa-fire text-brand-yellow"></i> 
         متاح الآن حجز أوردرات (دفعة شهر 5) - الكمية محدودة!
     </div>
 
-    <!-- Navbar -->
     <nav class="bg-white shadow-sm sticky top-0 z-30 border-b-2 border-brand-yellow">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-center h-16 items-center">
@@ -77,7 +72,6 @@
         </div>
     </nav>
 
-    <!-- شريط السلة السفلي -->
     <div id="bottom-cart-bar" class="fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 shadow-[0_-10px_20px_rgba(0,0,0,0.08)] p-4 flex justify-between items-center z-40 transform translate-y-full transition-transform duration-300">
         <div class="flex flex-col">
             <span class="text-xs text-gray-500 font-bold">الإجمالي (بدون التوصيل)</span>
@@ -92,7 +86,6 @@
         </button>
     </div>
 
-    <!-- نافذة السلة الجانبية -->
     <div id="cart-overlay" class="fixed inset-0 bg-brand-navy/60 z-50 hidden opacity-0 transition-opacity duration-300 backdrop-blur-sm" onclick="toggleCart()"></div>
     <div id="cart-sidebar" class="fixed top-0 right-0 h-full w-full sm:w-96 bg-gray-50 shadow-2xl z-50 transform translate-x-full transition-transform duration-300 flex flex-col">
         <div class="p-4 border-b border-gray-200 flex justify-between items-center bg-white">
@@ -155,7 +148,6 @@
         </div>
     </div>
 
-    <!-- Alert Modal -->
     <div id="alert-modal" class="fixed inset-0 bg-brand-navy/80 z-[60] hidden opacity-0 transition-opacity duration-300 flex items-center justify-center backdrop-blur-sm">
         <div class="bg-white rounded-2xl p-6 w-11/12 max-w-sm text-center shadow-2xl transform scale-95 transition-transform duration-300" id="alert-box">
             <div class="w-16 h-16 bg-brand-light text-brand-cyanDark rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
@@ -167,7 +159,6 @@
         </div>
     </div>
 
-    <!-- Admin Modals -->
     <div id="admin-login-modal" class="fixed inset-0 bg-brand-navy/90 z-[70] hidden opacity-0 transition-opacity duration-300 flex items-center justify-center backdrop-blur-sm">
         <div class="bg-white rounded-2xl p-6 w-11/12 max-w-sm shadow-2xl">
             <div class="flex justify-between items-center mb-6">
@@ -195,7 +186,6 @@
         </div>
     </div>
 
-    <!-- Hero Section -->
     <header class="hero-pattern py-10 text-center border-b border-brand-cyan/20">
         <div class="max-w-7xl mx-auto px-4">
             <span class="bg-white text-brand-cyanDark px-5 py-1.5 rounded-full text-xs font-black mb-4 inline-block shadow-sm border border-brand-cyan/30">
@@ -208,14 +198,12 @@
         </div>
     </header>
 
-    <!-- Products Section -->
     <section id="products" class="py-8 bg-gray-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
-            <!-- دليل الأحجام (المكان المخصص للصورة المجمعة) -->
             <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden mb-10 group">
-                <div class="relative w-full h-40 sm:h-64 bg-gray-100">
-                    <img src="all-sizes.jpg" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'100\\' height=\\'100\\'><rect width=\\'100%\\' height=\\'100%\\' fill=\\'%23f1f5f9\\'/><text x=\\'50%\\' y=\\'50%\\' font-size=\\'12\\' font-weight=\\'bold\\' text-anchor=\\'middle\\' fill=\\'%2394a3b8\\'>صورة دليل الأحجام (الـ 4 أطباق)</text></svg>'" class="w-full h-full object-contain" alt="دليل أحجام سمان ههيا">
+                <div class="relative w-full h-auto bg-gray-100">
+                    <img src="all-sizes.jpg" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'100\\' height=\\'100\\'><rect width=\\'100%\\' height=\\'100%\\' fill=\\'%23f1f5f9\\'/><text x=\\'50%\\' y=\\'50%\\' font-size=\\'12\\' font-weight=\\'bold\\' text-anchor=\\'middle\\' fill=\\'%2394a3b8\\'>صورة دليل الأحجام (الـ 4 أطباق)</text></svg>'" class="w-full h-auto object-cover rounded-lg" alt="دليل أحجام سمان ههيا">
                 </div>
                 <div class="p-3 bg-brand-light border-t border-brand-cyan/20 text-center">
                     <p class="text-brand-navy font-bold text-sm"><i class="fa-solid fa-circle-info text-brand-cyanDark"></i> صورة توضيحية للفرق بين أحجام الأطباق المتاحة</p>
@@ -232,12 +220,10 @@
 
             <h2 class="text-xl md:text-2xl font-black text-brand-navy mb-6 mt-12 border-r-4 border-brand-yellow pr-3">منتجات المزرعة</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="extras-container">
-                <!-- المنتجات الإضافية -->
-            </div>
+                </div>
         </div>
     </section>
 
-    <!-- Footer -->
     <footer class="bg-brand-navy text-gray-400 py-8 border-t border-brand-navy mt-10">
         <div class="max-w-7xl mx-auto px-4 flex justify-between items-center">
             <div>
@@ -250,19 +236,17 @@
         </div>
     </footer>
 
-    <!-- Firebase Compat Libraries -->
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
-    <!-- JavaScript Logic -->
     <script>
-        // تعريف المنتجات
+        // تعريف المنتجات (بأسماء الصور القياسية)
         const productsInfo = {
-            'super': { name: 'طبق سوبر', price: 100, weight: '300-350 جم', images: ['super.png'], isExtra: false },
-            'jumbo': { name: 'طبق جامبو', price: 110, weight: '350-400 جم', images: ['jumbo.png'], isExtra: false },
-            'special': { name: 'طبق سبشيال', price: 120, weight: '400-450 جم', images: ['special.png'], isExtra: false },
-            'superspecial': { name: 'سوبر سبشيال', price: 130, weight: '450-500 جم', images: ['superspecial.png'], isExtra: false },
+            'super': { name: 'طبق سوبر', price: 100, weight: '300-350 جم', images: ['super.jpg'], isExtra: false },
+            'jumbo': { name: 'طبق جامبو', price: 110, weight: '350-400 جم', images: ['jumbo.jpg'], isExtra: false },
+            'special': { name: 'طبق سبشيال', price: 120, weight: '400-450 جم', images: ['special.jpg'], isExtra: false },
+            'superspecial': { name: 'سوبر سبشيال', price: 130, weight: '450-500 جم', images: ['superspecial.jpg'], isExtra: false },
             'eggs': { name: 'طبق بيض سمان', price: 50, weight: 'طبق 18 بيضة', images: ['eggs.jpg'], isExtra: true },
             'chicks': { name: 'كتاكيت سمان', price: 8, weight: 'كتكوت', images: ['chicks.jpg'], isExtra: true }
         };
@@ -345,17 +329,17 @@
         window.getCardActionHTML = function(id, isOutOfStock) {
             const inCart = cart[id] ? cart[id].quantity : 0;
             if (isOutOfStock && inCart === 0) {
-                return `<button disabled class="w-full bg-gray-100 text-gray-400 font-bold py-2.5 rounded-xl text-sm border border-gray-200">نفدت الكمية</button>`;
+                return `<button type="button" disabled class="w-full bg-gray-100 text-gray-400 font-bold py-2.5 rounded-xl text-sm border border-gray-200">نفدت الكمية</button>`;
             }
             if (inCart > 0) {
                 return `
                 <div class="flex items-center justify-between bg-brand-light/50 border border-brand-cyan/40 rounded-xl p-1 h-[42px]">
-                    <button onclick="updateQuantity('${id}', 1)" class="w-9 h-full bg-white text-brand-cyanDark rounded-lg shadow-sm font-black text-lg flex items-center justify-center hover:bg-brand-cyan hover:text-white transition-colors active:scale-95">+</button>
+                    <button type="button" onclick="updateQuantity('${id}', 1)" class="w-9 h-full bg-white text-brand-cyanDark rounded-lg shadow-sm font-black text-lg flex items-center justify-center hover:bg-brand-cyan hover:text-white transition-colors active:scale-95">+</button>
                     <span class="font-black text-brand-navy text-lg w-8 text-center">${inCart}</span>
-                    <button onclick="updateQuantity('${id}', -1)" class="w-9 h-full bg-white text-red-500 rounded-lg shadow-sm font-black text-xl flex items-center justify-center hover:bg-red-500 hover:text-white transition-colors active:scale-95 pb-1">-</button>
+                    <button type="button" onclick="updateQuantity('${id}', -1)" class="w-9 h-full bg-white text-red-500 rounded-lg shadow-sm font-black text-xl flex items-center justify-center hover:bg-red-500 hover:text-white transition-colors active:scale-95 pb-1">-</button>
                 </div>`;
             }
-            return `<button onclick="addToCart('${id}')" class="w-full bg-brand-cyanDark text-white hover:bg-brand-navy font-black py-2.5 rounded-xl transition-colors shadow-sm text-sm flex justify-center items-center gap-2 active:scale-95"><i class="fa-solid fa-plus"></i> إضافة للسلة</button>`;
+            return `<button type="button" onclick="addToCart('${id}')" class="w-full bg-brand-cyanDark text-white hover:bg-brand-navy font-black py-2.5 rounded-xl transition-colors shadow-sm text-sm flex justify-center items-center gap-2 active:scale-95"><i class="fa-solid fa-plus"></i> إضافة للسلة</button>`;
         }
 
         window.renderProducts = function() {
@@ -364,7 +348,6 @@
             
             if(!container || !extrasContainer) return;
 
-            // تحديث الأرقام فقط لو الكروت موجودة عشان نتجنب الرمشة
             if (container.children.length > 0 && !container.innerHTML.includes('جاري')) {
                 Object.keys(productsInfo).forEach(id => {
                     const stock = globalStock[id];
@@ -378,7 +361,7 @@
                     }
                     
                     const actionContainer = document.getElementById(`card-action-${id}`);
-                    if(actionContainer) actionContainer.innerHTML = getCardActionHTML(id, isOutOfStock);
+                    if(actionContainer) actionContainer.innerHTML = window.getCardActionHTML(id, isOutOfStock);
                 });
                 return;
             }
@@ -396,7 +379,7 @@
                     const cardHtml = `
                     <div class="bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow border border-gray-200 overflow-hidden flex flex-col h-full relative group">
                         <div class="h-44 w-full relative bg-gray-50 border-b border-gray-100 overflow-hidden">
-                            <img id="img-${id}" src="${item.images[0]}" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'100\\' height=\\'100\\'><rect width=\\'100%\\' height=\\'100%\\' fill=\\'%23f8fafc\\'/><text x=\\'50%\\' y=\\'50%\\' font-size=\\'12\\' font-weight=\\'bold\\' text-anchor=\\'middle\\' fill=\\'%2394a3b8\\'>صورة الطبق</text></svg>'" class="w-full h-full object-contain transition-transform duration-300">
+                            <img id="img-${id}" src="${item.images[0]}" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'100\\' height=\\'100\\'><rect width=\\'100%\\' height=\\'100%\\' fill=\\'%23f8fafc\\'/><text x=\\'50%\\' y=\\'50%\\' font-size=\\'12\\' font-weight=\\'bold\\' text-anchor=\\'middle\\' fill=\\'%2394a3b8\\'>صورة الطبق</text></svg>'" class="w-full h-full object-cover transition-transform duration-300">
                         </div>
                         <div class="p-4 flex-1 flex flex-col bg-white">
                             <h3 class="text-base font-black text-brand-navy mb-2 leading-tight">${item.name}</h3>
@@ -412,7 +395,7 @@
                                 </div>
                             </div>
                             <div class="mt-auto" id="card-action-${id}">
-                                ${getCardActionHTML(id, isOutOfStock)}
+                                ${window.getCardActionHTML(id, isOutOfStock)}
                             </div>
                         </div>
                     </div>`;
@@ -421,7 +404,7 @@
                     const extraHtml = `
                     <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden flex items-center p-2.5 gap-3">
                         <div class="w-20 h-20 shrink-0 relative overflow-hidden rounded-xl border border-gray-100">
-                            <img id="img-${id}" src="${item.images[0]}" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'100\\' height=\\'100\\'><rect width=\\'100%\\' height=\\'100%\\' fill=\\'%23f8fafc\\'/><text x=\\'50%\\' y=\\'50%\\' font-size=\\'10\\' text-anchor=\\'middle\\' fill=\\'%2394a3b8\\'>قريباً</text></svg>'" class="w-full h-full object-contain">
+                            <img id="img-${id}" src="${item.images[0]}" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'100\\' height=\\'100\\'><rect width=\\'100%\\' height=\\'100%\\' fill=\\'%23f8fafc\\'/><text x=\\'50%\\' y=\\'50%\\' font-size=\\'10\\' text-anchor=\\'middle\\' fill=\\'%2394a3b8\\'>قريباً</text></svg>'" class="w-full h-full object-cover">
                         </div>
                         <div class="flex-1 min-w-0">
                             <h4 class="font-black text-brand-navy text-sm truncate">${item.name}</h4>
@@ -431,7 +414,7 @@
                             </div>
                         </div>
                         <div class="w-24 shrink-0" id="card-action-${id}">
-                            ${getCardActionHTML(id, isOutOfStock)}
+                            ${window.getCardActionHTML(id, isOutOfStock)}
                         </div>
                     </div>`;
                     extrasContainer.innerHTML += extraHtml;
@@ -443,8 +426,11 @@
             const currentStock = globalStock[id];
             const inCart = cart[id] ? cart[id].quantity : 0;
             if (currentStock > inCart) {
-                if (cart[id]) cart[id].quantity++;
-                else cart[id] = { quantity: 1, price: productsInfo[id].price, name: productsInfo[id].name };
+                if (cart[id]) {
+                    cart[id].quantity++;
+                } else {
+                    cart[id] = { quantity: 1, price: productsInfo[id].price, name: productsInfo[id].name };
+                }
                 updateUI(); 
                 renderProducts(); 
             } else {
@@ -454,12 +440,20 @@
 
         window.updateQuantity = function(id, delta) {
             const currentStock = globalStock[id];
+            if (!cart[id]) return; 
+
             if (delta === 1) {
-                if (cart[id].quantity < currentStock) cart[id].quantity++;
-                else showAlert("عذراً", "هذا هو كل المخزون المتاح حالياً.");
+                if (cart[id].quantity < currentStock) {
+                    cart[id].quantity++;
+                } else {
+                    showAlert("عذراً", "هذا هو كل المخزون المتاح حالياً.");
+                }
             } else if (delta === -1) {
-                if (cart[id].quantity > 1) cart[id].quantity--;
-                else delete cart[id];
+                if (cart[id].quantity > 1) {
+                    cart[id].quantity--;
+                } else {
+                    delete cart[id];
+                }
             }
             updateUI(); 
             renderProducts(); 
@@ -484,9 +478,9 @@
                             <div class="text-brand-cyanDark font-black text-sm">${item.price} ج</div>
                         </div>
                         <div class="flex items-center gap-2 bg-gray-50 rounded-lg p-1 border border-gray-200 h-[36px]">
-                            <button onclick="updateQuantity('${id}', 1)" class="w-8 h-full bg-white text-brand-navy rounded shadow-sm font-black text-sm flex items-center justify-center active:scale-95">+</button>
+                            <button type="button" onclick="updateQuantity('${id}', 1)" class="w-8 h-full bg-white text-brand-navy rounded shadow-sm font-black text-sm flex items-center justify-center active:scale-95">+</button>
                             <span class="font-black text-brand-navy w-5 text-center text-sm">${item.quantity}</span>
-                            <button onclick="updateQuantity('${id}', -1)" class="w-8 h-full bg-white text-red-500 rounded shadow-sm font-black text-sm flex items-center justify-center pb-1 active:scale-95">-</button>
+                            <button type="button" onclick="updateQuantity('${id}', -1)" class="w-8 h-full bg-white text-red-500 rounded shadow-sm font-black text-sm flex items-center justify-center pb-1 active:scale-95">-</button>
                         </div>
                     </div>`;
             }
