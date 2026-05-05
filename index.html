@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -256,13 +257,14 @@
 
     <!-- JavaScript Logic -->
     <script>
+        // الأكواد الجديدة بالامتدادات اللي إنت ضفتها
         const productsInfo = {
             'super': { name: 'طبق سوبر', price: 100, weight: '300-350 جم', images: ['super.png'], isExtra: false },
             'jumbo': { name: 'طبق جامبو', price: 110, weight: '350-400 جم', images: ['jumbo.png'], isExtra: false },
-            'special': { name: 'طبق سبشيال', price: 120, weight: '400-450 جم', images: ['special,png'], isExtra: false },
+            'special': { name: 'طبق سبشيال', price: 120, weight: '400-450 جم', images: ['special.png'], isExtra: false },
             'superspecial': { name: 'سوبر سبشيال', price: 130, weight: '450-500 جم', images: ['superspecial.png'], isExtra: false },
-            'eggs': { name: 'طبق بيض سمان', price: 50, weight: 'طبق 18 بيضة', images: ['eggs'], isExtra: true },
-            'chicks': { name: 'كتاكيت سمان', price: 8, weight: 'كتكوت', images: ['chicks'], isExtra: true }
+            'eggs': { name: 'طبق بيض سمان', price: 50, weight: 'طبق 18 بيضة', images: ['eggs.jpg'], isExtra: true }, // حطيتلك الـ .jpg هنا
+            'chicks': { name: 'كتاكيت سمان', price: 8, weight: 'كتكوت', images: ['chicks.jpg'], isExtra: true } // وهنا كمان
         };
 
         // المخزون العام اللي بييجي من الداتا بيز
@@ -363,7 +365,7 @@
                 Object.keys(productsInfo).forEach(id => {
                     const available = getAvailableStock(id);
                     const stockDisplay = document.getElementById(`stock-display-${id}`);
-                    if(stockDisplay) stockDisplay.innerText = available; // بيعرض المتاح الفعلي بعد الخصم من السلة
+                    if(stockDisplay) stockDisplay.innerText = available; 
                     
                     const actionContainer = document.getElementById(`card-action-${id}`);
                     if(actionContainer) actionContainer.innerHTML = window.getCardActionHTML(id);
@@ -379,7 +381,7 @@
                 const available = getAvailableStock(id);
                 const stockBadgeClass = available <= 10 ? (available === 0 ? 'bg-red-50 text-red-600' : 'bg-orange-50 text-orange-600') : 'bg-green-50 text-green-700';
 
-                // تصميم أفقي (صورة شمال)
+                // تم التعديل هنا: شلنا الـ .jpg الاوتوماتيك عشان يقرا الصورة بـ png أو jpg حسب ما إنت كاتب
                 const cardHtml = `
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden flex flex-row h-[130px] relative">
                     <div class="p-3 flex-1 flex flex-col justify-between bg-white min-w-0">
@@ -402,7 +404,7 @@
                         </div>
                     </div>
                     <div class="w-32 shrink-0 relative bg-gray-100 border-r border-gray-100">
-                        <img id="img-${id}" src="${item.images[0]}.jpg" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'100\\' height=\\'100\\'><rect width=\\'100%\\' height=\\'100%\\' fill=\\'%23f1f5f9\\'/><text x=\\'50%\\' y=\\'50%\\' font-size=\\'10\\' text-anchor=\\'middle\\' fill=\\'%2394a3b8\\'>صورة</text></svg>'" class="w-full h-full object-cover">
+                        <img id="img-${id}" src="${item.images[0]}" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'100\\' height=\\'100\\'><rect width=\\'100%\\' height=\\'100%\\' fill=\\'%23f1f5f9\\'/><text x=\\'50%\\' y=\\'50%\\' font-size=\\'10\\' text-anchor=\\'middle\\' fill=\\'%2394a3b8\\'>صورة</text></svg>'" class="w-full h-full object-cover">
                     </div>
                 </div>`;
 
@@ -422,7 +424,7 @@
                             ${window.getCardActionHTML(id)}
                         </div>
                         <div class="w-16 h-16 sm:w-20 sm:h-20 shrink-0 relative overflow-hidden rounded-xl border border-gray-100">
-                            <img id="img-${id}" src="${item.images[0]}.jpg" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'100\\' height=\\'100\\'><rect width=\\'100%\\' height=\\'100%\\' fill=\\'%23f8fafc\\'/><text x=\\'50%\\' y=\\'50%\\' font-size=\\'10\\' text-anchor=\\'middle\\' fill=\\'%2394a3b8\\'>قريباً</text></svg>'" class="w-full h-full object-cover">
+                            <img id="img-${id}" src="${item.images[0]}" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'100\\' height=\\'100\\'><rect width=\\'100%\\' height=\\'100%\\' fill=\\'%23f8fafc\\'/><text x=\\'50%\\' y=\\'50%\\' font-size=\\'10\\' text-anchor=\\'middle\\' fill=\\'%2394a3b8\\'>قريباً</text></svg>'" class="w-full h-full object-cover">
                         </div>
                     </div>`;
                     extrasContainer.innerHTML += extraHtml;
@@ -585,7 +587,6 @@
             for (let id in cart) {
                 if (cart[id].quantity > globalStock[id]) {
                     showAlert("تنبيه", `المنتج ${productsInfo[id].name} لم يعد متوفر بهذه الكمية، لقد تم حجزه بواسطة عميل آخر للتو.`);
-                    // تحديث الواجهة عشان العميل يشوف المخزون الحقيقي الجديد
                     cart[id].quantity = globalStock[id];
                     if(cart[id].quantity === 0) delete cart[id];
                     updateUI();
@@ -647,7 +648,6 @@
             checkoutBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-2xl"></i> جاري تسجيل الطلب...';
 
             try {
-                // إرسال الطلب لتيك تيك
                 await fetch('https://api.web3forms.com/submit', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
@@ -664,10 +664,8 @@
                 if (hasCloud && db) {
                     let updates = {};
                     for (let id in cart) {
-                        // استخدام Increment بالسالب لخصم الكمية بشكل آمن برمجياً
                         updates[id] = firebase.firestore.FieldValue.increment(-cart[id].quantity);
                     }
-                    // تحديث قاعدة البيانات في الخلفية
                     await db.collection('inventory').doc('stock').update(updates);
                 }
 
