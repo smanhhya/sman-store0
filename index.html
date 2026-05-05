@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -132,12 +133,27 @@
                     <label class="block text-sm font-bold text-gray-700 mb-1">العنوان بالتفصيل</label>
                     <input type="text" id="customer-address" placeholder="اسم الشارع، علامة مميزة بجوارك..." class="w-full border border-gray-300 rounded-xl p-3 focus:border-brand-cyanDark outline-none font-semibold text-brand-navy bg-white shadow-sm transition-colors">
                 </div>
+                
+                <!-- كود الخصم -->
+                <div class="pt-2">
+                    <label class="block text-sm font-bold text-gray-700 mb-1">كود الخصم (اختياري)</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="promo-code" placeholder="أدخل الكود..." class="w-full border border-gray-300 rounded-xl p-3 focus:border-brand-cyanDark outline-none font-semibold text-brand-navy bg-white shadow-sm transition-colors text-center">
+                        <button type="button" onclick="applyPromoCode()" class="bg-brand-cyanDark hover:bg-brand-navy text-white font-bold px-4 rounded-xl transition-colors shrink-0">تطبيق</button>
+                    </div>
+                    <p id="promo-message" class="text-xs font-bold mt-2 hidden"></p>
+                </div>
             </div>
 
             <div class="bg-brand-light/30 rounded-xl p-4 mb-4 border border-brand-cyan/20">
                 <div class="flex justify-between text-gray-600 text-sm font-bold mb-2">
                     <span>قيمة الطلبات:</span>
                     <span><span id="cart-subtotal">0</span> ج.م</span>
+                </div>
+                <!-- سطر الخصم المخفي -->
+                <div id="discount-row" class="flex justify-between text-red-500 text-sm font-bold mb-2 hidden">
+                    <span>الخصم (<span id="discount-percent">0</span>%):</span>
+                    <span>- <span id="cart-discount">0</span> ج.م</span>
                 </div>
                 <div class="flex justify-between text-brand-cyanDark text-sm font-bold mb-3 border-b border-brand-cyan/20 pb-3">
                     <span>مصاريف التوصيل:</span>
@@ -211,7 +227,6 @@
     <section id="products" class="py-6">
         <div class="max-w-3xl mx-auto px-4 sm:px-6">
             
-            <!-- صورة دليل الأحجام -->
             <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden mb-8">
                 <div class="w-full h-auto bg-gray-100">
                     <img src="all-sizes.jpg" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'100\\' height=\\'100\\'><rect width=\\'100%\\' height=\\'100%\\' fill=\\'%23f1f5f9\\'/><text x=\\'50%\\' y=\\'50%\\' font-size=\\'12\\' font-weight=\\'bold\\' text-anchor=\\'middle\\' fill=\\'%2394a3b8\\'>صورة دليل الأحجام (all-sizes.jpg)</text></svg>'" class="w-full h-auto object-cover" alt="دليل أحجام سمان ههيا">
@@ -249,33 +264,33 @@
         </div>
     </footer>
 
-    <!-- Firebase Compat Libraries -->
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
-    <!-- JavaScript Logic -->
     <script>
-        // الأكواد الجديدة بالامتدادات اللي إنت ضفتها
         const productsInfo = {
             'super': { name: 'طبق سوبر', price: 100, weight: '300-350 جم', images: ['super.png'], isExtra: false },
             'jumbo': { name: 'طبق جامبو', price: 110, weight: '350-400 جم', images: ['jumbo.png'], isExtra: false },
             'special': { name: 'طبق سبشيال', price: 120, weight: '400-450 جم', images: ['special.png'], isExtra: false },
             'superspecial': { name: 'سوبر سبشيال', price: 130, weight: '450-500 جم', images: ['superspecial.png'], isExtra: false },
-            'eggs': { name: 'طبق بيض سمان', price: 50, weight: 'طبق 18 بيضة', images: ['eggs.jpg'], isExtra: true }, // حطيتلك الـ .jpg هنا
-            'chicks': { name: 'كتاكيت سمان', price: 8, weight: 'كتكوت', images: ['chicks.jpg'], isExtra: true } // وهنا كمان
+            'eggs': { name: 'طبق بيض سمان', price: 50, weight: 'طبق 18 بيضة', images: ['eggs.jpg'], isExtra: true }, 
+            'chicks': { name: 'كتاكيت سمان', price: 8, weight: 'كتكوت', images: ['chicks.jpg'], isExtra: true } 
         };
 
-        // المخزون العام اللي بييجي من الداتا بيز
         let globalStock = { 'super': 100, 'jumbo': 50, 'special': 30, 'superspecial': 10, 'eggs': 50, 'chicks': 200 };
-        // سلة العميل الحالية
         let cart = {};
         let db = null;
         let hasCloud = false;
 
-        // ==================================================
-        // 1. Helper Function: حساب المخزون المتاح بعد الخصم من السلة
-        // ==================================================
+        // متغيرات الكوبونات
+        let discountPercent = 0;
+        const validPromoCodes = {
+            'سمان ههيا': 5,
+            'welcom': 5,
+            'VIP': 10
+        };
+
         function getAvailableStock(id) {
             const inCart = cart[id]?.quantity || 0;
             return Math.max(0, globalStock[id] - inCart);
@@ -333,9 +348,30 @@
             });
         }
 
-        // ==================================================
-        // 2. تحديث تصميم الأزرار بناءً على المخزون الذكي المتاح
-        // ==================================================
+        // تطبيق الخصم
+        window.applyPromoCode = function() {
+            const codeInput = document.getElementById('promo-code').value.trim();
+            const msgEl = document.getElementById('promo-message');
+            
+            if (codeInput === '') {
+                discountPercent = 0;
+                msgEl.classList.add('hidden');
+                updateUI();
+                return;
+            }
+
+            if(validPromoCodes[codeInput]) {
+                discountPercent = validPromoCodes[codeInput];
+                msgEl.innerText = `تم تطبيق الخصم بنجاح! (${discountPercent}%)`;
+                msgEl.className = "text-xs font-bold mt-2 text-green-600 block";
+            } else {
+                discountPercent = 0;
+                msgEl.innerText = "كود الخصم غير صحيح أو منتهي.";
+                msgEl.className = "text-xs font-bold mt-2 text-red-500 block";
+            }
+            updateUI();
+        };
+
         window.getCardActionHTML = function(id) {
             const inCart = cart[id]?.quantity || 0;
             const available = getAvailableStock(id);
@@ -380,7 +416,6 @@
                 const available = getAvailableStock(id);
                 const stockBadgeClass = available <= 10 ? (available === 0 ? 'bg-red-50 text-red-600' : 'bg-orange-50 text-orange-600') : 'bg-green-50 text-green-700';
 
-                // تم التعديل هنا: شلنا الـ .jpg الاوتوماتيك عشان يقرا الصورة بـ png أو jpg حسب ما إنت كاتب
                 const cardHtml = `
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden flex flex-row h-[130px] relative">
                     <div class="p-3 flex-1 flex flex-col justify-between bg-white min-w-0">
@@ -431,9 +466,6 @@
             });
         };
 
-        // ==================================================
-        // 3. تحديثات ذكية للإضافة والتعديل بناءً على المخزون الفعلي
-        // ==================================================
         window.addToCart = function(id) {
             const available = getAvailableStock(id);
             if (available <= 0) {
@@ -505,19 +537,41 @@
                 } else {
                     bottomBar.classList.add('translate-y-full');
                     cartItemsContainer.innerHTML = `<div class="flex flex-col items-center justify-center py-10 text-gray-400 gap-3"><i class="fa-solid fa-basket-shopping text-5xl text-gray-200"></i><p class="font-bold text-sm">لم تقم باختيار أي أطباق</p></div>`;
+                    
+                    // تصفير الخصم لو السلة فاضية
+                    discountPercent = 0;
+                    const promoInput = document.getElementById('promo-code');
+                    const promoMsg = document.getElementById('promo-message');
+                    if(promoInput) promoInput.value = '';
+                    if(promoMsg) promoMsg.classList.add('hidden');
                 }
             }
 
             const deliverySelect = document.getElementById('delivery-zone');
             const deliveryFee = deliverySelect ? (parseInt(deliverySelect.value) || 0) : 0;
-            const finalTotal = subTotalPrice + deliveryFee;
+            
+            // حساب الخصم
+            const discountAmount = (subTotalPrice * discountPercent) / 100;
+            const priceAfterDiscount = subTotalPrice - discountAmount;
+            const finalTotal = priceAfterDiscount + deliveryFee;
 
             const subTotalEl = document.getElementById('cart-subtotal');
             const delFeeEl = document.getElementById('cart-delivery-fee');
             const totalEl = document.getElementById('cart-total');
+            const discountRow = document.getElementById('discount-row');
             
             if(subTotalEl) subTotalEl.innerText = subTotalPrice;
             
+            if(discountRow) {
+                if (discountPercent > 0 && subTotalPrice > 0) {
+                    discountRow.classList.remove('hidden');
+                    document.getElementById('discount-percent').innerText = discountPercent;
+                    document.getElementById('cart-discount').innerText = discountAmount;
+                } else {
+                    discountRow.classList.add('hidden');
+                }
+            }
+
             if(delFeeEl) {
                 if(deliverySelect && deliverySelect.value === "0" && deliverySelect.options[deliverySelect.selectedIndex].text.includes("مكان آخر")) {
                     delFeeEl.innerText = "يحدد لاحقاً";
@@ -580,9 +634,6 @@
                 return;
             }
 
-            // ==================================================
-            // 4. حماية إضافية وقت الـ Checkout (Very Important)
-            // ==================================================
             for (let id in cart) {
                 if (cart[id].quantity > globalStock[id]) {
                     showAlert("تنبيه", `المنتج ${productsInfo[id].name} لم يعد متوفر بهذه الكمية، لقد تم حجزه بواسطة عميل آخر للتو.`);
@@ -625,11 +676,17 @@
                 orderDetailsForTickTick += `▪️ ${item.name}\n  └ ${item.quantity} × ${item.price} = ${itemTotal} ج.م\n`;
             }
             
-            const finalTotal = subTotal + deliveryFee;
+            const discountAmount = (subTotal * discountPercent) / 100;
+            const priceAfterDiscount = subTotal - discountAmount;
+            const finalTotal = priceAfterDiscount + deliveryFee;
             const deliveryText = (deliveryFee === 0 && zoneName === 'مكان آخر') ? "يحدد لاحقاً" : `${deliveryFee} ج.م`;
 
             message += `\n═════════════════\n`;
             message += `📦 قيمة الطلبات: ${subTotal} ج.م\n`;
+            if (discountPercent > 0) {
+                message += `🎁 خصم (${discountPercent}%): -${discountAmount} ج.م\n`;
+                orderDetailsForTickTick += `\nالخصم: -${discountAmount} ج.م`;
+            }
             message += `🚚 رسوم التوصيل: ${deliveryText}\n`;
             message += `💰 *الإجمالي النهائي: ${finalTotal} ج.م*\n`;
             
@@ -657,9 +714,6 @@
                     })
                 });
 
-                // ==================================================
-                // 5. خصم المخزون الحقيقي من Firebase (Cloud Update)
-                // ==================================================
                 if (hasCloud && db) {
                     let updates = {};
                     for (let id in cart) {
@@ -676,6 +730,12 @@
             document.getElementById('customer-name').value = "";
             document.getElementById('customer-address').value = "";
             document.getElementById('delivery-zone').value = ""; 
+            discountPercent = 0;
+            const promoInput = document.getElementById('promo-code');
+            const promoMsg = document.getElementById('promo-message');
+            if(promoInput) promoInput.value = '';
+            if(promoMsg) promoMsg.classList.add('hidden');
+            
             updateUI(); 
             renderProducts();
             toggleCart();
