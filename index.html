@@ -52,6 +52,15 @@
         
         input[type=number]::-webkit-inner-spin-button, 
         input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        
+        /* تأثير النبض للطلبات */
+        @keyframes pulse-soft {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+        .animate-pulse-soft {
+            animation: pulse-soft 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
     </style>
 </head>
 <body class="text-gray-800 antialiased selection:bg-brand-navy selection:text-white">
@@ -227,7 +236,7 @@
             </div>
         </div>
         <button onclick="toggleChatbot()" class="pointer-events-auto w-14 h-14 bg-brand-cyanDark hover:bg-brand-navy text-white rounded-full shadow-[0_4px_15px_rgba(2,132,199,0.4)] flex items-center justify-center text-2xl transition-all transform hover:scale-105 active:scale-95">
-            <i class="fa-solid fa-messages"></i>
+            <i class="fa-solid fa-comments"></i>
         </button>
     </div>
 
@@ -240,6 +249,29 @@
             <p class="text-brand-navy/80 font-bold max-w-xl mx-auto bg-white/80 p-3 rounded-xl backdrop-blur-sm border border-white mt-4 text-sm md:text-base shadow-sm">
                 احجز أوردرك دلوقتي من دفعة شهر 5. الكمية محدودة جداً!
             </p>
+            
+            <div class="flex justify-center items-center gap-4 mt-6">
+                <div class="bg-white/90 backdrop-blur-md px-4 py-2 rounded-xl shadow-sm border border-white flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-full bg-brand-light flex items-center justify-center text-brand-cyanDark">
+                        <i class="fa-solid fa-eye"></i>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-[10px] text-gray-500 font-bold leading-none">مهتمين الآن</div>
+                        <div class="font-black text-brand-navy leading-tight"><span id="public-visits-count">...</span> زائر</div>
+                    </div>
+                </div>
+                
+                <div class="bg-white/90 backdrop-blur-md px-4 py-2 rounded-xl shadow-sm border border-white flex items-center gap-2 animate-pulse-soft">
+                    <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-600">
+                        <i class="fa-solid fa-cart-check"></i>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-[10px] text-gray-500 font-bold leading-none">تم حجز</div>
+                        <div class="font-black text-green-700 leading-tight"><span id="public-orders-count">...</span> طلب</div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </header>
 
@@ -302,6 +334,8 @@
         let db = null;
         let hasCloud = false;
 
+        let globalStats = { visits: 0, orders: 0 };
+
         let discountPercent = 0;
         const validPromoCodes = {
             'سمان ههيا': 5,
@@ -344,7 +378,12 @@
 
                 auth.signInAnonymously().catch(() => {});
                 auth.onAuthStateChanged(user => {
-                    if(user) { hasCloud = true; listenToStock(); } 
+                    if(user) { 
+                        hasCloud = true; 
+                        listenToStock(); 
+                        listenToStats(); 
+                        recordVisit();   
+                    } 
                 });
             } catch (e) { 
                 console.log("Firebase not initialized"); 
@@ -364,6 +403,34 @@
             }, error => {
                 hasCloud = false; 
             });
+        }
+
+        function listenToStats() {
+            if(!db) return;
+            db.collection('analytics').doc('stats').onSnapshot(snapshot => {
+                if (snapshot.exists) {
+                    const data = snapshot.data();
+                    globalStats.visits = data.visits || 0;
+                    globalStats.orders = data.orders || 0;
+                    
+                    const publicVisitsCount = document.getElementById('public-visits-count');
+                    const publicOrdersCount = document.getElementById('public-orders-count');
+                    
+                    if(publicVisitsCount) publicVisitsCount.innerText = globalStats.visits + 124; 
+                    if(publicOrdersCount) publicOrdersCount.innerText = globalStats.orders + 38; 
+                }
+            }, error => { console.log(error); });
+        }
+
+        function recordVisit() {
+            if (!localStorage.getItem('sman_visited')) {
+                localStorage.setItem('sman_visited', 'true');
+                if (hasCloud && db) {
+                    db.collection('analytics').doc('stats').set({
+                        visits: firebase.firestore.FieldValue.increment(1)
+                    }, { merge: true }).catch(() => {});
+                }
+            }
         }
 
         window.applyPromoCode = function() {
@@ -735,6 +802,10 @@
                         updates[id] = firebase.firestore.FieldValue.increment(-cart[id].quantity);
                     }
                     await db.collection('inventory').doc('stock').update(updates);
+                    
+                    await db.collection('analytics').doc('stats').set({
+                        orders: firebase.firestore.FieldValue.increment(1)
+                    }, { merge: true }).catch(()=>{});
                 }
 
             } catch(e) { 
@@ -798,14 +869,32 @@
         window.openAdminDashboard = function() {
             const container = document.getElementById('admin-inputs-container'); 
             if(!container) return;
-            container.innerHTML = '';
+            
+            let htmlContent = `
+                <div class="flex gap-3 mb-6">
+                    <div class="flex-1 bg-brand-light/50 p-3 rounded-xl text-center border border-brand-cyan/30 shadow-sm">
+                        <i class="fa-solid fa-users text-brand-cyanDark text-xl mb-1"></i>
+                        <div class="text-[10px] font-bold text-gray-500 mb-1">الزيارات الجديدة</div>
+                        <div class="text-lg font-black text-brand-navy">${globalStats.visits}</div>
+                    </div>
+                    <div class="flex-1 bg-green-50 p-3 rounded-xl text-center border border-green-200 shadow-sm">
+                        <i class="fa-solid fa-check-to-slot text-green-600 text-xl mb-1"></i>
+                        <div class="text-[10px] font-bold text-gray-500 mb-1">الطلبات المؤكدة</div>
+                        <div class="text-lg font-black text-green-700">${globalStats.orders}</div>
+                    </div>
+                </div>
+                <h3 class="font-black text-brand-navy mb-3 text-sm border-r-4 border-brand-yellow pr-2">تحديث المخزون:</h3>
+            `;
+
             Object.keys(productsInfo).forEach(id => {
-                container.innerHTML += `
-                    <div class="flex justify-between items-center bg-gray-50 p-3 rounded-xl border border-gray-200">
+                htmlContent += `
+                    <div class="flex justify-between items-center bg-gray-50 p-3 rounded-xl border border-gray-200 mb-2">
                         <span class="font-bold text-brand-navy text-sm">${productsInfo[id].name}</span>
                         <div class="flex items-center gap-2"><input type="number" id="admin-input-${id}" value="${globalStock[id]}" class="w-16 text-center border border-gray-300 rounded-lg p-1.5 font-black text-brand-cyanDark focus:border-brand-cyan outline-none"></div>
                     </div>`;
             });
+            container.innerHTML = htmlContent;
+
             const modal = document.getElementById('admin-dashboard-modal'); 
             modal.classList.remove('hidden');
             setTimeout(() => modal.classList.remove('opacity-0'), 10);
@@ -881,11 +970,14 @@
                 }));
                 formattedHistory.push({ role: 'user', parts: [{ text: message }] });
 
+                // تعديل بسيط هنا لضمان قراءة التعليمات صح بدون أخطاء
                 const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        system_instruction: { parts: { text: systemInstruction } },
+                        system_instruction: { 
+                            parts: [{ text: systemInstruction }] 
+                        },
                         contents: formattedHistory,
                         generationConfig: { temperature: 0.3 }
                     })
@@ -893,7 +985,10 @@
 
                 const data = await response.json();
                 
-                if (data.error) throw new Error('API Error');
+                if (data.error) {
+                    console.error("Gemini API Error:", data.error);
+                    throw new Error('API Error');
+                }
 
                 const botReply = data.candidates[0].content.parts[0].text;
                 
