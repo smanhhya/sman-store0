@@ -1,1 +1,1 @@
-# sman-store0
+# STORE
