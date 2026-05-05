@@ -77,7 +77,7 @@
         </div>
     </nav>
 
-    <!-- شريط السلة السفلي (يظهر عند الطلب) -->
+    <!-- شريط السلة السفلي -->
     <div id="bottom-cart-bar" class="fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 shadow-[0_-10px_20px_rgba(0,0,0,0.08)] p-4 flex justify-between items-center z-40 transform translate-y-full transition-transform duration-300">
         <div class="flex flex-col">
             <span class="text-xs text-gray-500 font-bold">الإجمالي (بدون التوصيل)</span>
@@ -117,9 +117,15 @@
                     <select id="delivery-zone" onchange="updateUI()" class="w-full border border-gray-300 rounded-xl p-3 focus:border-brand-cyanDark outline-none font-semibold text-brand-navy bg-white shadow-sm transition-colors appearance-none">
                         <option value="" disabled selected>اختر منطقتك لحساب الشحن...</option>
                         <option value="15">ههيا (15 جنيه)</option>
-                        <option value="45">أبو كبير / الزقازيق / الإبراهيمية (45 جنيه)</option>
-                        <option value="25">صبيح / مهدية (25 جنيه)</option>
-                        <option value="30">العدوة / الشبراوين (30 جنيه)</option>
+                        <option value="25">صبيح (25 جنيه)</option>
+                        <option value="25">مهدية (25 جنيه)</option>
+                        <option value="30">العدوة (30 جنيه)</option>
+                        <option value="30">الشبراوين (30 جنيه)</option>
+                        <option value="45">أبو كبير (45 جنيه)</option>
+                        <option value="45">الزقازيق (45 جنيه)</option>
+                        <option value="45">الإبراهيمية (45 جنيه)</option>
+                        <!-- الخيار الجديد -->
+                        <option value="0">مكان آخر (يتم تحديد السعر لاحقاً)</option>
                     </select>
                 </div>
                 <div>
@@ -135,7 +141,7 @@
                 </div>
                 <div class="flex justify-between text-brand-cyanDark text-sm font-bold mb-3 border-b border-brand-cyan/20 pb-3">
                     <span>مصاريف التوصيل:</span>
-                    <span><span id="cart-delivery-fee">0</span> ج</span>
+                    <span id="cart-delivery-fee" class="text-xs">0 ج</span>
                 </div>
                 <div class="flex justify-between items-center text-lg">
                     <span class="font-black text-brand-navy">الإجمالي المطلوب:</span>
@@ -209,7 +215,9 @@
             <h2 class="text-xl md:text-2xl font-black text-brand-navy mb-6 border-r-4 border-brand-cyanDark pr-3">أطباق السمان المجهزة</h2>
             
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-10" id="products-container">
-                <!-- المنتجات هتترسم هنا -->
+                <div class="col-span-full text-center py-10 text-brand-cyanDark">
+                    <i class="fa-solid fa-spinner fa-spin text-3xl mb-3"></i><p class="font-bold text-sm">جاري تحميل المنيو...</p>
+                </div>
             </div>
 
             <h2 class="text-xl md:text-2xl font-black text-brand-navy mb-6 mt-12 border-r-4 border-brand-yellow pr-3">منتجات المزرعة</h2>
@@ -239,13 +247,13 @@
 
     <!-- JavaScript Logic -->
     <script>
-        // تعريف المنتجات والصور المتاحة حالياً
+        // تعديل الأسماء (سادة بدون ألقاب)
         const productsInfo = {
             'super': { name: 'طبق سوبر', price: 100, weight: '300-350 جم', images: ['super.jpg'], isExtra: false },
             'jumbo': { name: 'طبق جامبو', price: 110, weight: '350-400 جم', images: ['jumbo.jpg'], isExtra: false },
             'special': { name: 'طبق سبشيال', price: 120, weight: '400-450 جم', images: ['special.jpg'], isExtra: false },
             'superspecial': { name: 'سوبر سبشيال', price: 130, weight: '450-500 جم', images: ['superspecial.jpg'], isExtra: false },
-            'eggs': { name: 'طبق بيض سمان (18 بيضة)', price: 50, weight: 'طبق', images: ['eggs.jpg'], isExtra: true },
+            'eggs': { name: 'طبق بيض سمان', price: 50, weight: 'طبق 18 بيضة', images: ['eggs.jpg'], isExtra: true },
             'chicks': { name: 'كتاكيت سمان', price: 8, weight: 'كتكوت', images: ['chicks.jpg'], isExtra: true }
         };
 
@@ -257,9 +265,8 @@
         let db = null;
         let hasCloud = false;
 
-        // تأمين الأحداث وتحديث الواجهة
         document.addEventListener('DOMContentLoaded', () => {
-            renderProducts(); // رسم الموقع فوراً عشان ميهنجش
+            renderProducts(); 
             setupEventListeners();
             initFirebase();
         });
@@ -370,8 +377,7 @@
             
             if(!container || !extrasContainer) return;
 
-            // لو الكروت مرسومة، هنحدث الأرقام بس عشان الصور مترمش
-            if (container.children.length > 0) {
+            if (container.children.length > 0 && !container.innerHTML.includes('جاري')) {
                 Object.keys(productsInfo).forEach(id => {
                     const stock = globalStock[id];
                     const isOutOfStock = stock === 0;
@@ -530,7 +536,15 @@
             const totalEl = document.getElementById('cart-total');
             
             if(subTotalEl) subTotalEl.innerText = subTotalPrice;
-            if(delFeeEl) delFeeEl.innerText = deliveryFee;
+            
+            // تحديث رسالة التوصيل في السلة بناء على اختيار "مكان آخر"
+            if(delFeeEl) {
+                if(deliverySelect && deliverySelect.value === "0" && deliverySelect.options[deliverySelect.selectedIndex].text.includes("مكان آخر")) {
+                    delFeeEl.innerText = "يحدد لاحقاً";
+                } else {
+                    delFeeEl.innerText = deliveryFee + " ج";
+                }
+            }
             if(totalEl) totalEl.innerText = finalTotal;
 
             const checkoutBtn = document.getElementById('checkout-btn');
@@ -576,15 +590,18 @@
             const customerName = document.getElementById('customer-name').value.trim();
             const customerAddress = document.getElementById('customer-address').value.trim();
             const deliverySelect = document.getElementById('delivery-zone');
-            const zoneName = deliverySelect.options[deliverySelect.selectedIndex].text.split(' (')[0];
-            const deliveryFee = parseInt(deliverySelect.value);
+            
+            // استخراج اسم المنطقة بدقة
+            const zoneNameOriginal = deliverySelect.options[deliverySelect.selectedIndex].text;
+            const zoneName = zoneNameOriginal.includes('مكان آخر') ? 'مكان آخر' : zoneNameOriginal.split(' (')[0];
+            const deliveryFee = parseInt(deliverySelect.value) || 0;
             
             if(!customerName || deliverySelect.value === "") {
                 showAlert("تنبيه", "يرجى كتابة الاسم واختيار منطقة التوصيل.");
                 return;
             }
 
-            // الكود السري بتاع Web3Forms لربط تيك تيك
+            // الكود السري لبرنامج TickTick
             const web3FormsKey = "d8e4b3fe-018c-4c39-b15f-191ccc7cf10c"; 
             
             let subTotal = 0;
@@ -602,18 +619,30 @@
                 const item = cart[id];
                 const itemTotal = item.quantity * item.price;
                 subTotal += itemTotal;
-                message += `▪️ ${item.quantity}x ${item.name} = ${itemTotal} جنيه\n`;
-                orderDetailsForTickTick += `- ${item.quantity}x ${item.name} (${itemTotal} ج)\n`;
+                
+                // شكل الفاتورة المحاسبي الجديد
+                message += `${item.name}  ▪️ ${item.quantity} × ${item.price} ج = ${itemTotal} جنيه\n`;
+                orderDetailsForTickTick += `${item.name}  ▪️ ${item.quantity} × ${item.price} ج = ${itemTotal} ج\n`;
             }
             
             const finalTotal = subTotal + deliveryFee;
+            
+            // معالجة نص التوصيل إذا كان "مكان آخر"
+            const deliveryText = (deliveryFee === 0 && zoneName === 'مكان آخر') ? "يتم تحديده لاحقاً" : `${deliveryFee} جنيه`;
 
             message += `----------------------\n`;
-            message += `🚚 *التوصيل:* ${deliveryFee} جنيه\n`;
-            message += `💰 *الإجمالي الكلي:* ${finalTotal} جنيه\n\n`;
-            message += `(في انتظار تأكيد الحجز وموعد الاستلام)`;
+            message += `🚚 *التوصيل:* ${deliveryText}\n`;
+            message += `💰 *الإجمالي الكلي:* ${finalTotal} جنيه\n`;
+            
+            // إضافة ملاحظة للإجمالي لو التوصيل لم يحدد بعد
+            if(deliveryFee === 0 && zoneName === 'مكان آخر') {
+                message += `*(غير شامل مصاريف التوصيل)*\n`;
+                orderDetailsForTickTick += `\nالإجمالي: ${finalTotal} ج (غير شامل التوصيل)`;
+            } else {
+                orderDetailsForTickTick += `\nالإجمالي: ${finalTotal} ج (شاملاً التوصيل ${deliveryFee} ج)`;
+            }
 
-            orderDetailsForTickTick += `\nالإجمالي: ${finalTotal} ج (شاملاً التوصيل ${deliveryFee} ج)`;
+            message += `\n(في انتظار تأكيد الحجز وموعد الاستلام)`;
 
             const checkoutBtn = document.getElementById('checkout-btn');
             const originalBtnHtml = checkoutBtn.innerHTML;
@@ -724,7 +753,4 @@
     </script>
 </body>
 </html>
-
-
-```
 
