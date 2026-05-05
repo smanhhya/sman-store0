@@ -296,30 +296,39 @@
             });
         }
 
-        // أزرار العداد (السلة)
+                // ==========================================
+        // 1. كود أزرار العداد (تم حل مشكلة النقصان جذرياً)
+        // ==========================================
         window.getCardActionHTML = function(id, isOutOfStock) {
             const inCart = cart[id] ? cart[id].quantity : 0;
+            
             if (isOutOfStock && inCart === 0) {
-                return `<button type="button" disabled class="w-full bg-gray-100 text-gray-400 font-bold py-2 rounded-xl text-sm border border-gray-200">نفدت الكمية</button>`;
+                return `<button type="button" disabled class="w-full bg-gray-100 text-gray-400 font-bold py-2 rounded-xl text-sm border border-gray-200 cursor-not-allowed">نفدت الكمية</button>`;
             }
+            
             if (inCart > 0) {
+                // ضفت هنا onclick بصيغة مختلفة تماماً لمنع أي تداخل
                 return `
                 <div class="flex items-center justify-between bg-brand-light/50 border border-brand-cyan/40 rounded-xl p-1 h-[40px]">
-                    <button type="button" onclick="event.preventDefault(); updateQuantity('${id}', 1)" class="w-9 h-full bg-white text-brand-cyanDark rounded-lg shadow-sm font-black text-lg flex items-center justify-center hover:bg-brand-cyan hover:text-white active:scale-95 transition-all">+</button>
-                    <span class="font-black text-brand-navy text-lg w-8 text-center">${inCart}</span>
-                    <button type="button" onclick="event.preventDefault(); updateQuantity('${id}', -1)" class="w-9 h-full bg-white text-red-500 rounded-lg shadow-sm font-black text-xl flex items-center justify-center hover:bg-red-500 hover:text-white active:scale-95 transition-all pb-1">-</button>
+                    <div onclick="updateQuantity('${id}', 1)" class="w-9 h-full bg-white text-brand-cyanDark rounded-lg shadow-sm font-black text-lg flex items-center justify-center hover:bg-brand-cyan hover:text-white cursor-pointer select-none">+</div>
+                    <span class="font-black text-brand-navy text-lg w-8 text-center select-none">${inCart}</span>
+                    <div onclick="updateQuantity('${id}', -1)" class="w-9 h-full bg-white text-red-500 rounded-lg shadow-sm font-black text-xl flex items-center justify-center hover:bg-red-500 hover:text-white cursor-pointer select-none pb-1">-</div>
                 </div>`;
             }
-            return `<button type="button" onclick="event.preventDefault(); addToCart('${id}')" class="w-full bg-brand-cyanDark text-white hover:bg-brand-navy font-black py-2 rounded-xl transition-colors shadow-sm text-sm flex justify-center items-center gap-2 active:scale-95"><i class="fa-solid fa-plus"></i> إضافة للسلة</button>`;
+            
+            return `<div onclick="addToCart('${id}')" class="w-full bg-brand-cyanDark text-white hover:bg-brand-navy font-black py-2 rounded-xl transition-colors shadow-sm text-sm flex justify-center items-center gap-2 cursor-pointer select-none"><i class="fa-solid fa-plus"></i> إضافة للسلة</div>`;
         }
 
+        // ==========================================
+        // 2. كود رسم الكروت (الصورة شمال والتفاصيل يمين)
+        // ==========================================
         window.renderProducts = function() {
             const container = document.getElementById('products-container');
             const extrasContainer = document.getElementById('extras-container');
             
             if(!container || !extrasContainer) return;
 
-            // لو المنتجات موجودة، بنحدث العدادات بس عشان منعملش ريفريش للصور
+            // تحديث الأرقام فقط بدون إعادة رسم الصفحة
             if (container.children.length > 0 && !container.innerHTML.includes('جاري')) {
                 Object.keys(productsInfo).forEach(id => {
                     const stock = globalStock[id];
@@ -343,17 +352,10 @@
                 const isOutOfStock = stock === 0;
                 const stockBadgeClass = stock <= 10 ? (stock === 0 ? 'bg-red-50 text-red-600' : 'bg-orange-50 text-orange-600') : 'bg-green-50 text-green-700';
 
-                // ==========================================
-                // التصميم الأفقي (List View) لجميع المنتجات
-                // ==========================================
+                // تصميم الكارت الأساسي (صورة شمال)
                 const cardHtml = `
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden flex flex-row h-[130px] relative">
-                    <!-- الصورة يمين -->
-                    <div class="w-32 shrink-0 relative bg-gray-100 border-l border-gray-100">
-                        <img id="img-${id}" src="${item.images[0]}.jpg" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'100\\' height=\\'100\\'><rect width=\\'100%\\' height=\\'100%\\' fill=\\'%23f1f5f9\\'/><text x=\\'50%\\' y=\\'50%\\' font-size=\\'10\\' text-anchor=\\'middle\\' fill=\\'%2394a3b8\\'>صورة</text></svg>'" class="w-full h-full object-cover">
-                    </div>
-                    
-                    <!-- التفاصيل شمال -->
+                    <!-- التفاصيل يمين -->
                     <div class="p-3 flex-1 flex flex-col justify-between bg-white min-w-0">
                         <div>
                             <h3 class="text-sm md:text-base font-black text-brand-navy truncate mb-1">${item.name}</h3>
@@ -373,16 +375,40 @@
                             </div>
                         </div>
                     </div>
+                    
+                    <!-- الصورة شمال -->
+                    <div class="w-32 shrink-0 relative bg-gray-100 border-r border-gray-100">
+                        <img id="img-${id}" src="${item.images[0]}.jpg" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'100\\' height=\\'100\\'><rect width=\\'100%\\' height=\\'100%\\' fill=\\'%23f1f5f9\\'/><text x=\\'50%\\' y=\\'50%\\' font-size=\\'10\\' text-anchor=\\'middle\\' fill=\\'%2394a3b8\\'>صورة</text></svg>'" class="w-full h-full object-cover">
+                    </div>
                 </div>`;
 
                 if (!item.isExtra) {
                     container.innerHTML += cardHtml;
                 } else {
-                    extrasContainer.innerHTML += cardHtml;
+                    // تصميم كارت الإضافات (صورة شمال)
+                    const extraHtml = `
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden flex flex-row items-center p-2.5 gap-3 h-[90px]">
+                        <!-- التفاصيل يمين -->
+                        <div class="flex-1 min-w-0">
+                            <h4 class="font-black text-brand-navy text-xs sm:text-sm truncate">${item.name}</h4>
+                            <div class="text-brand-cyanDark font-black text-xs sm:text-sm mb-1">${item.price} ج <span class="text-[10px] text-gray-400 font-bold">/ ${item.weight}</span></div>
+                            <div id="stock-badge-${id}" class="text-[10px] font-bold px-1.5 py-0.5 rounded inline-flex border ${stockBadgeClass}">
+                                المتاح: <span id="stock-display-${id}">${stock}</span>
+                            </div>
+                        </div>
+                        <div class="w-24 shrink-0" id="card-action-${id}">
+                            ${window.getCardActionHTML(id, isOutOfStock)}
+                        </div>
+                        <!-- الصورة شمال -->
+                        <div class="w-16 h-16 sm:w-20 sm:h-20 shrink-0 relative overflow-hidden rounded-xl border border-gray-100">
+                            <img id="img-${id}" src="${item.images[0]}.jpg" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'100\\' height=\\'100\\'><rect width=\\'100%\\' height=\\'100%\\' fill=\\'%23f8fafc\\'/><text x=\\'50%\\' y=\\'50%\\' font-size=\\'10\\' text-anchor=\\'middle\\' fill=\\'%2394a3b8\\'>قريباً</text></svg>'" class="w-full h-full object-cover">
+                        </div>
+                    </div>`;
+                    extrasContainer.innerHTML += extraHtml;
                 }
             });
         };
-
+        
         window.addToCart = function(id) {
             const currentStock = globalStock[id];
             const inCart = cart[id] ? cart[id].quantity : 0;
