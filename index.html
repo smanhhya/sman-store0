@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -53,6 +52,15 @@
 
         input[type=number]::-webkit-inner-spin-button, 
         input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+
+        /* حركة علامة العرض (الخصم) */
+        .sale-badge {
+            animation: bounce-small 2s infinite ease-in-out;
+        }
+        @keyframes bounce-small {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-4px); }
+        }
     </style>
 </head>
 <body class="text-gray-800 antialiased selection:bg-brand-navy selection:text-white">
@@ -113,14 +121,14 @@
                     <label class="block text-sm font-bold text-gray-700 mb-1">منطقة التوصيل <span class="text-red-500">*</span></label>
                     <select id="delivery-zone" onchange="updateUI()" class="w-full border border-gray-300 rounded-xl p-3 focus:border-brand-cyanDark outline-none font-semibold text-brand-navy bg-white shadow-sm transition-colors appearance-none">
                         <option value="" disabled selected>اختر منطقتك لحساب الشحن...</option>
-                        <option value="15">ههيا (15 جنيه)</option>
-                        <option value="25">صبيح (25 جنيه)</option>
-                        <option value="25">مهدية (25 جنيه)</option>
-                        <option value="30">العدوة (30 جنيه)</option>
-                        <option value="30">الشبراوين (30 جنيه)</option>
-                        <option value="45">أبو كبير (45 جنيه)</option>
-                        <option value="45">الزقازيق (45 جنيه)</option>
-                        <option value="45">الإبراهيمية (45 جنيه)</option>
+                        <option id="opt-z1" value="15">ههيا (15 جنيه)</option>
+                        <option id="opt-z2a" value="25">صبيح (25 جنيه)</option>
+                        <option id="opt-z2b" value="25">مهدية (25 جنيه)</option>
+                        <option id="opt-z3a" value="30">العدوة (30 جنيه)</option>
+                        <option id="opt-z3b" value="30">الشبراوين (30 جنيه)</option>
+                        <option id="opt-z4a" value="45">أبو كبير (45 جنيه)</option>
+                        <option id="opt-z4b" value="45">الزقازيق (45 جنيه)</option>
+                        <option id="opt-z4c" value="45">الإبراهيمية (45 جنيه)</option>
                         <option value="0">مكان آخر (يتم تحديد السعر لاحقاً)</option>
                     </select>
                 </div>
@@ -181,7 +189,7 @@
 
     <div id="alert-modal" class="fixed inset-0 bg-brand-navy/80 z-[60] hidden opacity-0 transition-opacity duration-300 flex items-center justify-center backdrop-blur-sm">
         <div class="bg-white rounded-2xl p-6 w-11/12 max-w-sm text-center shadow-2xl transform scale-95 transition-transform duration-300" id="alert-box">
-            <div class="w-16 h-16 bg-brand-light text-brand-cyanDark rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
+            <div class="w-16 h-16 bg-brand-light text-brand-cyanDark rounded-full flex items-center justify-center mx-auto mb-4 text-3xl" id="alert-icon-container">
                 <i class="fa-solid fa-bell" id="alert-icon"></i>
             </div>
             <h3 class="text-xl font-black text-brand-navy mb-2" id="alert-title">تنبيه</h3>
@@ -194,27 +202,52 @@
     <div id="admin-login-modal" class="fixed inset-0 bg-brand-navy/90 z-[70] hidden opacity-0 transition-opacity duration-300 flex items-center justify-center backdrop-blur-sm">
         <div class="bg-white rounded-2xl p-6 w-11/12 max-w-sm shadow-2xl">
             <div class="flex justify-between items-center mb-6">
-                <h3 class="text-xl font-black text-brand-navy flex items-center gap-2"><i class="fa-solid fa-lock text-brand-yellow"></i> الإدارة</h3>
+                <h3 class="text-xl font-black text-brand-navy flex items-center gap-2"><i class="fa-solid fa-lock text-brand-yellow"></i> الإدارة الشاملة</h3>
                 <button onclick="closeAdminLogin()" class="text-gray-400 hover:text-red-500 bg-gray-100 w-8 h-8 rounded-full"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <input type="password" id="admin-pin" class="w-full border-2 border-gray-200 rounded-xl p-4 mb-4 text-center text-2xl tracking-widest focus:border-brand-cyan outline-none font-bold text-brand-navy" placeholder="الرقم السري">
-            <button onclick="verifyAdminPin()" class="w-full bg-brand-navy text-white font-bold py-4 rounded-xl transition-colors">تسجيل الدخول</button>
+            <button onclick="verifyAdminPin()" class="w-full bg-brand-navy text-white font-bold py-4 rounded-xl transition-colors">دخول</button>
         </div>
     </div>
 
     <div id="admin-dashboard-modal" class="fixed inset-0 bg-gray-50 z-[80] hidden opacity-0 transition-opacity duration-300 flex flex-col">
         <div class="bg-white border-b border-gray-200 p-4 flex justify-between items-center shadow-sm">
-            <h2 class="text-lg font-black text-brand-navy"><i class="fa-solid fa-boxes-stacked text-brand-cyanDark"></i> تحديث الأسعار والمخزون</h2>
+            <h2 class="text-lg font-black text-brand-navy"><i class="fa-solid fa-sliders text-brand-cyanDark"></i> لوحة التحكم</h2>
             <button onclick="closeAdminDashboard()" class="text-gray-500 hover:text-red-500"><i class="fa-solid fa-xmark text-xl"></i></button>
         </div>
         <div class="p-4 flex-1 overflow-y-auto">
             <div class="max-w-2xl mx-auto bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
-                <div id="connection-status" class="mb-6 p-3 rounded-lg text-sm font-bold bg-gray-100 text-gray-600 text-center">جاري الاتصال...</div>
+                <div id="connection-status" class="mb-4 p-2 rounded-lg text-xs font-bold bg-gray-100 text-gray-600 text-center">جاري الاتصال بقاعدة البيانات...</div>
                 
+                <!-- قسم أسعار التوصيل -->
+                <div class="bg-brand-light/30 border border-brand-cyan/30 rounded-xl p-4 mb-6">
+                    <h3 class="font-black text-brand-navy mb-3 border-b border-brand-cyan/20 pb-2"><i class="fa-solid fa-motorcycle text-brand-cyanDark"></i> أسعار التوصيل (ج.م)</h3>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="text-[10px] font-bold text-gray-600 block mb-1">ههيا</label>
+                            <input type="number" id="admin-del-z1" class="w-full border border-gray-300 rounded-lg p-2 text-center font-bold text-brand-navy outline-none focus:border-brand-cyan">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold text-gray-600 block mb-1">صبيح / مهدية</label>
+                            <input type="number" id="admin-del-z2" class="w-full border border-gray-300 rounded-lg p-2 text-center font-bold text-brand-navy outline-none focus:border-brand-cyan">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold text-gray-600 block mb-1">العدوة / الشبراوين</label>
+                            <input type="number" id="admin-del-z3" class="w-full border border-gray-300 rounded-lg p-2 text-center font-bold text-brand-navy outline-none focus:border-brand-cyan">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold text-gray-600 block mb-1">أبوكبير / الزقازيق</label>
+                            <input type="number" id="admin-del-z4" class="w-full border border-gray-300 rounded-lg p-2 text-center font-bold text-brand-navy outline-none focus:border-brand-cyan">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- قسم المنتجات -->
+                <h3 class="font-black text-brand-navy mb-3"><i class="fa-solid fa-box-open text-brand-yellow"></i> المنتجات والمخزون والعروض</h3>
                 <div id="admin-inputs-container" class="space-y-4"></div>
                 
-                <button onclick="saveStockToCloud()" class="w-full mt-6 bg-brand-cyanDark hover:bg-brand-navy text-white font-black py-4 rounded-xl shadow-md flex justify-center items-center gap-2 transition-colors">
-                    <i class="fa-solid fa-check-double text-xl"></i> حفظ التعديلات فوراً
+                <button onclick="saveAdminData()" class="w-full mt-6 bg-green-500 hover:bg-green-600 text-white font-black py-4 rounded-xl shadow-md flex justify-center items-center gap-2 transition-colors">
+                    <i class="fa-solid fa-check-double text-xl"></i> حفظ جميع التعديلات
                 </button>
             </div>
         </div>
@@ -277,21 +310,22 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
     <script>
-        // هنا حطينا الأسعار كـ "افتراضي" لكنها هتتحدث من قاعدة البيانات
+        // بيانات المنتجات الأساسية
         const productsInfo = {
-            'super': { name: 'طبق سوبر', price: 100, weight: '300-350 جم', images: ['super.png'], isExtra: false },
-            'jumbo': { name: 'طبق جامبو', price: 110, weight: '350-400 جم', images: ['jumbo.png'], isExtra: false },
-            'special': { name: 'طبق سبشيال', price: 120, weight: '400-450 جم', images: ['special.png'], isExtra: false },
-            'superspecial': { name: 'سوبر سبشيال', price: 130, weight: '450-500 جم', images: ['superspecial.png'], isExtra: false },
-            'eggs': { name: 'طبق بيض سمان', price: 50, weight: 'طبق 18 بيضة', images: ['eggs.jpg'], isExtra: true },
-            'chicks': { name: 'كتاكيت سمان', price: 8, weight: 'كتكوت', images: ['chicks.jpg'], isExtra: true } 
+            'super': { name: 'طبق سوبر', basePrice: 100, weight: '300-350 جم', images: ['super.png'], isExtra: false },
+            'jumbo': { name: 'طبق جامبو', basePrice: 110, weight: '350-400 جم', images: ['jumbo.png'], isExtra: false },
+            'special': { name: 'طبق سبشيال', basePrice: 120, weight: '400-450 جم', images: ['special.png'], isExtra: false },
+            'superspecial': { name: 'سوبر سبشيال', basePrice: 130, weight: '450-500 جم', images: ['superspecial.png'], isExtra: false },
+            'eggs': { name: 'طبق بيض سمان', basePrice: 50, weight: 'طبق 18 بيضة', images: ['eggs.jpg'], isExtra: true },
+            'chicks': { name: 'كتاكيت سمان', basePrice: 8, weight: 'كتكوت', images: ['chicks.jpg'], isExtra: true } 
         };
 
+        // المتغيرات الحية (اللي بتتعدل من الإدارة)
         let globalStock = { 'super': 100, 'jumbo': 50, 'special': 30, 'superspecial': 10, 'eggs': 50, 'chicks': 200 };
-        
-        // مصفوفة الأسعار الذكية الجديدة
-        let globalPrices = {};
-        Object.keys(productsInfo).forEach(id => globalPrices[id] = productsInfo[id].price);
+        let globalPrices = {}; Object.keys(productsInfo).forEach(id => globalPrices[id] = productsInfo[id].basePrice);
+        let globalOldPrices = {}; Object.keys(productsInfo).forEach(id => globalOldPrices[id] = productsInfo[id].basePrice + 20);
+        let globalDiscounts = {}; Object.keys(productsInfo).forEach(id => globalDiscounts[id] = false);
+        let globalDelivery = { z1: 15, z2: 25, z3: 30, z4: 45 };
 
         let cart = {};
         let db = null;
@@ -338,37 +372,68 @@
 
                 auth.signInAnonymously().catch(() => {});
                 auth.onAuthStateChanged(user => {
-                    if(user) { hasCloud = true; listenToStock(); } 
+                    if(user) { hasCloud = true; listenToDatabase(); } 
                 });
             } catch (e) { 
                 console.log("Firebase not initialized"); 
             }
         }
 
-        function listenToStock() {
+        function listenToDatabase() {
             if(!db) return;
             
             // قراءة المخزون
-            db.collection('inventory').doc('stock').onSnapshot(snapshot => {
-                if (snapshot.exists) {
-                    const data = snapshot.data();
-                    for(let id in globalStock) if(data[id] !== undefined) globalStock[id] = data[id];
-                }
-                renderProducts(); 
-                updateUI();
-            }, error => {
-                hasCloud = false; 
+            db.collection('inventory').doc('stock').onSnapshot(doc => {
+                if(doc.exists) { const data = doc.data(); for(let id in globalStock) if(data[id] !== undefined) globalStock[id] = data[id]; }
+                renderProducts(); updateUI();
+            }, error => { hasCloud = false; });
+
+            // قراءة الأسعار الحالية
+            db.collection('inventory').doc('prices').onSnapshot(doc => {
+                if(doc.exists) { const data = doc.data(); for(let id in globalPrices) if(data[id] !== undefined) globalPrices[id] = data[id]; }
+                renderProducts(); updateUI();
             });
 
-            // قراءة الأسعار الحية
-            db.collection('inventory').doc('prices').onSnapshot(snapshot => {
-                if (snapshot.exists) {
-                    const data = snapshot.data();
-                    for(let id in globalPrices) if(data[id] !== undefined) globalPrices[id] = data[id];
-                }
-                renderProducts(); 
-                updateUI();
+            // قراءة حالة العروض
+            db.collection('inventory').doc('discounts_status').onSnapshot(doc => {
+                if(doc.exists) { const data = doc.data(); for(let id in globalDiscounts) if(data[id] !== undefined) globalDiscounts[id] = data[id]; }
+                renderProducts();
             });
+
+            // قراءة السعر القديم
+            db.collection('inventory').doc('old_prices').onSnapshot(doc => {
+                if(doc.exists) { const data = doc.data(); for(let id in globalOldPrices) if(data[id] !== undefined) globalOldPrices[id] = data[id]; }
+                renderProducts();
+            });
+
+            // قراءة أسعار التوصيل
+            db.collection('inventory').doc('delivery_fees').onSnapshot(doc => {
+                if(doc.exists) { 
+                    const data = doc.data(); 
+                    if(data.z1 !== undefined) globalDelivery.z1 = data.z1;
+                    if(data.z2 !== undefined) globalDelivery.z2 = data.z2;
+                    if(data.z3 !== undefined) globalDelivery.z3 = data.z3;
+                    if(data.z4 !== undefined) globalDelivery.z4 = data.z4;
+                    updateDeliveryDropdown();
+                    updateUI();
+                }
+            });
+        }
+
+        function updateDeliveryDropdown() {
+            const z1 = document.getElementById('opt-z1');
+            const z2a = document.getElementById('opt-z2a'); const z2b = document.getElementById('opt-z2b');
+            const z3a = document.getElementById('opt-z3a'); const z3b = document.getElementById('opt-z3b');
+            const z4a = document.getElementById('opt-z4a'); const z4b = document.getElementById('opt-z4b'); const z4c = document.getElementById('opt-z4c');
+            
+            if(z1) { z1.value = globalDelivery.z1; z1.text = `ههيا (${globalDelivery.z1} جنيه)`; }
+            if(z2a) { z2a.value = globalDelivery.z2; z2a.text = `صبيح (${globalDelivery.z2} جنيه)`; }
+            if(z2b) { z2b.value = globalDelivery.z2; z2b.text = `مهدية (${globalDelivery.z2} جنيه)`; }
+            if(z3a) { z3a.value = globalDelivery.z3; z3a.text = `العدوة (${globalDelivery.z3} جنيه)`; }
+            if(z3b) { z3b.value = globalDelivery.z3; z3b.text = `الشبراوين (${globalDelivery.z3} جنيه)`; }
+            if(z4a) { z4a.value = globalDelivery.z4; z4a.text = `أبو كبير (${globalDelivery.z4} جنيه)`; }
+            if(z4b) { z4b.value = globalDelivery.z4; z4b.text = `الزقازيق (${globalDelivery.z4} جنيه)`; }
+            if(z4c) { z4c.value = globalDelivery.z4; z4c.text = `الإبراهيمية (${globalDelivery.z4} جنيه)`; }
         }
 
         window.switchCustomerType = function(type) {
@@ -426,23 +491,6 @@
             const extrasContainer = document.getElementById('extras-container');
 
             if(!container || !extrasContainer) return;
-
-            // تحديث البيانات الحية داخل الكروت الموجودة بالفعل بدون إعادة رسم لعدم تشتيت المستخدم
-            if (container.children.length > 0 && !container.innerHTML.includes('جاري')) {
-                Object.keys(productsInfo).forEach(id => {
-                    const available = getAvailableStock(id);
-                    const stockDisplay = document.getElementById(`stock-display-${id}`);
-                    const priceDisplay = document.getElementById(`price-display-${id}`);
-                    
-                    if(stockDisplay) stockDisplay.innerText = available; 
-                    if(priceDisplay) priceDisplay.innerText = globalPrices[id]; 
-
-                    const actionContainer = document.getElementById(`card-action-${id}`);
-                    if(actionContainer) actionContainer.innerHTML = window.getCardActionHTML(id);
-                });
-                return;
-            }
-
             container.innerHTML = ''; 
             extrasContainer.innerHTML = '';
 
@@ -450,51 +498,74 @@
                 const item = productsInfo[id];
                 const available = getAvailableStock(id);
                 const currentPrice = globalPrices[id];
+                const isDiscountActive = globalDiscounts[id];
+                const oldPrice = globalOldPrices[id];
+
                 const stockBadgeClass = available <= 10 ? (available === 0 ? 'bg-red-50 text-red-600' : 'bg-orange-50 text-orange-600') : 'bg-green-50 text-green-700';
 
+                let priceHtml = '';
+                let saleBadgeHtml = '';
+
+                if (isDiscountActive) {
+                    saleBadgeHtml = `<div class="absolute top-4 left-4 bg-red-500 text-white text-[10px] font-black px-3 py-1 rounded-full shadow-lg sale-badge z-10"><i class="fa-solid fa-tag"></i> عرض</div>`;
+                    priceHtml = `
+                        <div class="flex flex-col">
+                            <span class="text-[11px] text-gray-400 line-through decoration-red-500 font-bold">${oldPrice} ج.م</span>
+                            <span class="font-black text-red-600 text-xl">${currentPrice} <span class="text-[10px] text-gray-500">ج.م</span></span>
+                        </div>`;
+                } else {
+                    priceHtml = `<span class="font-black text-brand-cyanDark text-lg">${currentPrice} <span class="text-[10px] text-gray-400">ج.م</span></span>`;
+                }
+
                 const cardHtml = `
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden flex flex-row h-[130px] relative">
+                <div class="bg-white rounded-2xl shadow-sm border ${isDiscountActive ? 'border-red-200' : 'border-gray-200'} overflow-hidden flex flex-row h-[130px] relative">
+                    ${saleBadgeHtml}
                     <div class="p-3 flex-1 flex flex-col justify-between bg-white min-w-0">
                         <div>
                             <h3 class="text-sm md:text-base font-black text-brand-navy truncate mb-1">${item.name}</h3>
-                            <div class="flex items-center gap-2 mb-1">
-                                <span class="font-black text-brand-cyanDark text-lg"><span id="price-display-${id}">${currentPrice}</span> <span class="text-[10px] text-gray-400">ج.م</span></span>
+                            <div class="flex items-center justify-between gap-2 mb-1">
+                                ${priceHtml}
                                 <span class="bg-gray-50 text-gray-500 text-[10px] px-1.5 py-0.5 rounded border border-gray-200 font-bold whitespace-nowrap">
                                     <i class="fa-solid fa-scale-balanced mr-1"></i> ${item.weight}
                                 </span>
                             </div>
                         </div>
                         <div class="flex items-center justify-between mt-auto">
-                            <div id="stock-badge-${id}" class="text-[10px] font-bold px-1.5 py-0.5 rounded border ${stockBadgeClass} shrink-0">
-                                المتاح: <span id="stock-display-${id}">${available}</span>
+                            <div class="text-[10px] font-bold px-1.5 py-0.5 rounded border ${stockBadgeClass} shrink-0">
+                                المتاح: <span>${available}</span>
                             </div>
-                            <div class="w-28 shrink-0" id="card-action-${id}">
+                            <div class="w-28 shrink-0">
                                 ${window.getCardActionHTML(id)}
                             </div>
                         </div>
                     </div>
                     <div class="w-32 shrink-0 relative bg-gray-100 border-r border-gray-100">
-                        <img id="img-${id}" src="${item.images[0]}" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'100\\' height=\\'100\\'><rect width=\\'100%\\' height=\\'100%\\' fill=\\'%23f1f5f9\\'/><text x=\\'50%\\' y=\\'50%\\' font-size=\\'10\\' text-anchor=\\'middle\\' fill=\\'%2394a3b8\\'>صورة</text></svg>'" class="w-full h-full object-cover">
+                        <img src="${item.images[0]}" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'100\\' height=\\'100\\'><rect width=\\'100%\\' height=\\'100%\\' fill=\\'%23f1f5f9\\'/><text x=\\'50%\\' y=\\'50%\\' font-size=\\'10\\' text-anchor=\\'middle\\' fill=\\'%2394a3b8\\'>صورة</text></svg>'" class="w-full h-full object-cover">
                     </div>
                 </div>`;
 
                 if (!item.isExtra) {
                     container.innerHTML += cardHtml;
                 } else {
+                    let extraPriceHtml = isDiscountActive ? 
+                        `<div class="flex gap-2 items-center"><span class="text-red-600 font-black text-sm">${currentPrice} ج</span><span class="text-[10px] text-gray-400 line-through">${oldPrice}</span></div>` : 
+                        `<div class="text-brand-cyanDark font-black text-sm">${currentPrice} ج</div>`;
+
                     const extraHtml = `
-                    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden flex flex-row items-center p-2.5 gap-3 h-[90px]">
+                    <div class="bg-white rounded-2xl shadow-sm border ${isDiscountActive ? 'border-red-300' : 'border-gray-200'} overflow-hidden flex flex-row items-center p-2.5 gap-3 h-[90px] relative">
+                        ${isDiscountActive ? `<div class="absolute top-1 right-1 bg-red-500 w-2 h-2 rounded-full sale-badge"></div>` : ''}
                         <div class="flex-1 min-w-0">
                             <h4 class="font-black text-brand-navy text-xs sm:text-sm truncate">${item.name}</h4>
-                            <div class="text-brand-cyanDark font-black text-xs sm:text-sm mb-1"><span id="price-display-${id}">${currentPrice}</span> ج <span class="text-[10px] text-gray-400 font-bold">/ ${item.weight}</span></div>
-                            <div id="stock-badge-${id}" class="text-[10px] font-bold px-1.5 py-0.5 rounded inline-flex border ${stockBadgeClass} shrink-0">
-                                المتاح: <span id="stock-display-${id}">${available}</span>
+                            ${extraPriceHtml}
+                            <div class="text-[10px] font-bold px-1.5 py-0.5 rounded inline-flex border ${stockBadgeClass} shrink-0 mt-1">
+                                المتاح: <span>${available}</span>
                             </div>
                         </div>
-                        <div class="w-28 shrink-0" id="card-action-${id}">
+                        <div class="w-28 shrink-0">
                             ${window.getCardActionHTML(id)}
                         </div>
                         <div class="w-16 h-16 sm:w-20 sm:h-20 shrink-0 relative overflow-hidden rounded-xl border border-gray-100">
-                            <img id="img-${id}" src="${item.images[0]}" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'100\\' height=\\'100\\'><rect width=\\'100%\\' height=\\'100%\\' fill=\\'%23f8fafc\\'/><text x=\\'50%\\' y=\\'50%\\' font-size=\\'10\\' text-anchor=\\'middle\\' fill=\\'%2394a3b8\\'>قريباً</text></svg>'" class="w-full h-full object-cover">
+                            <img src="${item.images[0]}" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'100\\' height=\\'100\\'><rect width=\\'100%\\' height=\\'100%\\' fill=\\'%23f8fafc\\'/><text x=\\'50%\\' y=\\'50%\\' font-size=\\'10\\' text-anchor=\\'middle\\' fill=\\'%2394a3b8\\'>قريباً</text></svg>'" class="w-full h-full object-cover">
                         </div>
                     </div>`;
                     extrasContainer.innerHTML += extraHtml;
@@ -511,7 +582,6 @@
             if (cart[id]) {
                 cart[id].quantity++;
             } else {
-                // نسجل السعر الحالي للطبق المضاف للسلة
                 cart[id] = { quantity: 1, price: globalPrices[id], name: productsInfo[id].name };
             }
             updateUI(); 
@@ -546,7 +616,6 @@
             cartItemsContainer.innerHTML = '';
 
             for (let id in cart) {
-                // تحديث سعر السلة في حالة إن السعر اتغير من الإدارة
                 cart[id].price = globalPrices[id];
                 
                 const item = cart[id];
@@ -584,20 +653,16 @@
             const deliveryFee = deliverySelect ? (parseInt(deliverySelect.value) || 0) : 0;
             const finalTotal = subTotalPrice + deliveryFee;
 
-            const subTotalEl = document.getElementById('cart-subtotal');
-            const delFeeEl = document.getElementById('cart-delivery-fee');
-            const totalEl = document.getElementById('cart-total');
+            if(document.getElementById('cart-subtotal')) document.getElementById('cart-subtotal').innerText = subTotalPrice;
 
-            if(subTotalEl) subTotalEl.innerText = subTotalPrice;
-
-            if(delFeeEl) {
+            if(document.getElementById('cart-delivery-fee')) {
                 if(deliverySelect && deliverySelect.value === "0" && deliverySelect.options[deliverySelect.selectedIndex].text.includes("مكان آخر")) {
-                    delFeeEl.innerText = "يحدد لاحقاً";
+                    document.getElementById('cart-delivery-fee').innerText = "يحدد لاحقاً";
                 } else {
-                    delFeeEl.innerText = deliveryFee + " ج.م";
+                    document.getElementById('cart-delivery-fee').innerText = deliveryFee + " ج.م";
                 }
             }
-            if(totalEl) totalEl.innerText = finalTotal;
+            if(document.getElementById('cart-total')) document.getElementById('cart-total').innerText = finalTotal;
 
             const checkoutBtn = document.getElementById('checkout-btn');
             const checkoutHint = document.getElementById('checkout-hint');
@@ -717,7 +782,6 @@
                 const itemTotal = item.quantity * item.price;
                 subTotal += itemTotal;
 
-                // تجهيز ملخص الأوردر عشان عنوان تيك تيك (مثال: 3 جامبو، 5 سوبر)
                 let shortName = item.name.replace('طبق ', '').split(' (')[0];
                 itemsSummaryArray.push(`${item.quantity} ${shortName}`);
 
@@ -730,7 +794,6 @@
             const finalTotal = subTotal + deliveryFee;
             const deliveryText = (deliveryFee === 0 && zoneName === 'مكان آخر') ? "يحدد لاحقاً" : `${deliveryFee} ج.م`;
 
-            // تجهيز عنوان تيك تيك اللي هيظهرلك من برة ويقولك الصنف والعدد
             let itemsString = itemsSummaryArray.join('، ');
             let tickTickSubject = `🛒 ${isNew ? 'عميل جديد' : 'عميل سابق'}: ${itemsString}`;
 
@@ -795,6 +858,8 @@
             if (isNew || wantsWhatsApp) {
                 window.location.href = `https://api.whatsapp.com/send?phone=201208027294&text=${encodeURIComponent(message)}`;
             } else {
+                document.getElementById('alert-icon-container').className = "w-16 h-16 bg-green-100 text-green-500 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl";
+                document.getElementById('alert-icon').className = "fa-solid fa-check";
                 showAlert("تم استلام الأوردر! 🎉", "شكراً لثقتك في سمان ههيا.. الأوردر وصل للسيستم بنجاح وهنجهزهولك فوراً. هنتواصل معاك قريباً للتأكيد.");
             }
         };
@@ -815,7 +880,11 @@
             modal.classList.add('opacity-0'); 
             box.classList.remove('scale-100'); 
             box.classList.add('scale-95');
-            setTimeout(() => modal.classList.add('hidden'), 300);
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                document.getElementById('alert-icon-container').className = "w-16 h-16 bg-brand-light text-brand-cyanDark rounded-full flex items-center justify-center mx-auto mb-4 text-3xl";
+                document.getElementById('alert-icon').className = "fa-solid fa-bell";
+            }, 300);
         };
 
         window.openAdminLogin = function() {
@@ -836,25 +905,45 @@
             else showAlert("خطأ", "الرمز السري غير صحيح!");
         };
 
-        // دالة فتح لوحة التحكم مع خانات (الأسعار) و (المخزون)
+        window.toggleOldPriceInput = function(id) {
+            const oldPriceInput = document.getElementById(`admin-oldprice-${id}`);
+            const checkbox = document.getElementById(`admin-discount-check-${id}`);
+            if(checkbox.checked) {
+                oldPriceInput.classList.remove('hidden');
+            } else {
+                oldPriceInput.classList.add('hidden');
+            }
+        };
+
         window.openAdminDashboard = function() {
+            document.getElementById('admin-del-z1').value = globalDelivery.z1;
+            document.getElementById('admin-del-z2').value = globalDelivery.z2;
+            document.getElementById('admin-del-z3').value = globalDelivery.z3;
+            document.getElementById('admin-del-z4').value = globalDelivery.z4;
+
             const container = document.getElementById('admin-inputs-container'); 
             if(!container) return;
             container.innerHTML = '';
             
             Object.keys(productsInfo).forEach(id => {
+                const isActive = globalDiscounts[id];
                 container.innerHTML += `
-                    <div class="flex flex-col bg-gray-50 p-4 rounded-xl border border-gray-200 shadow-sm">
-                        <span class="font-black text-brand-navy text-sm mb-3 border-b pb-2"><i class="fa-solid fa-tag text-brand-cyanDark"></i> ${productsInfo[id].name}</span>
-                        <div class="flex gap-4">
+                    <div class="flex flex-col bg-gray-50 p-4 rounded-xl border border-gray-200 shadow-sm mb-3">
+                        <span class="font-black text-brand-navy text-sm mb-3 border-b border-gray-200 pb-2"><i class="fa-solid fa-tag text-brand-cyanDark"></i> ${productsInfo[id].name}</span>
+                        <div class="flex gap-2 mb-3">
                             <div class="flex-1">
-                                <label class="text-[11px] text-gray-500 font-bold block mb-1">السعر (ج.م)</label>
-                                <input type="number" id="admin-price-${id}" value="${globalPrices[id]}" class="w-full text-center border-2 border-gray-300 rounded-xl p-2 font-black text-brand-cyanDark focus:border-brand-cyan outline-none transition-colors">
+                                <label class="text-[10px] text-gray-500 font-bold block mb-1">السعر للعميل</label>
+                                <input type="number" id="admin-price-${id}" value="${globalPrices[id]}" class="w-full text-center border border-gray-300 rounded-lg p-2 font-black text-brand-cyanDark focus:border-brand-cyan outline-none transition-colors">
                             </div>
                             <div class="flex-1">
-                                <label class="text-[11px] text-gray-500 font-bold block mb-1">العدد المتاح</label>
-                                <input type="number" id="admin-stock-${id}" value="${globalStock[id]}" class="w-full text-center border-2 border-gray-300 rounded-xl p-2 font-black text-brand-cyanDark focus:border-brand-cyan outline-none transition-colors">
+                                <label class="text-[10px] text-gray-500 font-bold block mb-1">الكمية المتاحة</label>
+                                <input type="number" id="admin-stock-${id}" value="${globalStock[id]}" class="w-full text-center border border-gray-300 rounded-lg p-2 font-black text-brand-cyanDark focus:border-brand-cyan outline-none transition-colors">
                             </div>
+                        </div>
+                        <div class="flex items-center gap-2 bg-brand-light/40 p-2 rounded-lg border border-brand-cyan/30">
+                            <input type="checkbox" id="admin-discount-check-${id}" ${isActive ? 'checked' : ''} onchange="toggleOldPriceInput('${id}')" class="w-4 h-4 text-brand-cyanDark rounded border-gray-300 accent-brand-cyanDark">
+                            <label class="text-[11px] font-bold text-brand-navy cursor-pointer select-none" onclick="document.getElementById('admin-discount-check-${id}').click()">تفعيل عرض خصم</label>
+                            <input type="number" id="admin-oldprice-${id}" value="${globalOldPrices[id]}" placeholder="السعر قبل" class="w-16 text-xs p-1.5 ml-auto border border-gray-300 rounded text-center outline-none ${isActive ? '' : 'hidden'} text-red-500 font-bold line-through">
                         </div>
                     </div>`;
             });
@@ -871,34 +960,63 @@
             setTimeout(() => modal.classList.add('hidden'), 300);
         };
 
-        // دالة الحفظ الذكية للأسعار والمخزون معاً
-        window.saveStockToCloud = async function() {
+        window.saveAdminData = async function() {
             let newStockData = {};
             let newPriceData = {};
+            let newDiscountsData = {};
+            let newOldPricesData = {};
 
             Object.keys(productsInfo).forEach(id => {
                 const stockVal = parseInt(document.getElementById(`admin-stock-${id}`).value);
                 const priceVal = parseInt(document.getElementById(`admin-price-${id}`).value);
+                const oldPriceVal = parseInt(document.getElementById(`admin-oldprice-${id}`).value);
+                const isDiscount = document.getElementById(`admin-discount-check-${id}`).checked;
                 
                 newStockData[id] = isNaN(stockVal) ? 0 : Math.max(0, stockVal);
-                newPriceData[id] = isNaN(priceVal) ? productsInfo[id].price : Math.max(0, priceVal);
+                newPriceData[id] = isNaN(priceVal) ? productsInfo[id].basePrice : Math.max(0, priceVal);
+                newOldPricesData[id] = isNaN(oldPriceVal) ? newPriceData[id] + 20 : Math.max(0, oldPriceVal);
+                newDiscountsData[id] = isDiscount;
             });
+
+            const newDelData = {
+                z1: parseInt(document.getElementById('admin-del-z1').value) || 15,
+                z2: parseInt(document.getElementById('admin-del-z2').value) || 25,
+                z3: parseInt(document.getElementById('admin-del-z3').value) || 30,
+                z4: parseInt(document.getElementById('admin-del-z4').value) || 45
+            };
+
+            const btn = document.querySelector('#admin-dashboard-modal button[onclick="saveAdminData()"]');
+            const originalHtml = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-xl"></i> جاري الحفظ...';
 
             if (hasCloud && db) {
                 try { 
-                    // حفظ الاتنين مع بعض في نفس اللحظة
                     await Promise.all([
                         db.collection('inventory').doc('stock').set(newStockData),
-                        db.collection('inventory').doc('prices').set(newPriceData)
+                        db.collection('inventory').doc('prices').set(newPriceData),
+                        db.collection('inventory').doc('discounts_status').set(newDiscountsData),
+                        db.collection('inventory').doc('old_prices').set(newOldPricesData),
+                        db.collection('inventory').doc('delivery_fees').set(newDelData)
                     ]);
                     closeAdminDashboard(); 
-                    showAlert("تم بنجاح", "تم تحديث الأسعار والمخزون وهتظهر للعملاء فوراً."); 
+                    btn.innerHTML = originalHtml;
+                    document.getElementById('alert-icon-container').className = "w-16 h-16 bg-green-100 text-green-500 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl";
+                    document.getElementById('alert-icon').className = "fa-solid fa-check";
+                    showAlert("تم بنجاح", "تم تحديث جميع الأسعار والعروض والتوصيل بنجاح."); 
                 } 
-                catch(e) { showAlert("خطأ", "فشل التحديث. تأكد من الإنترنت."); }
+                catch(e) { 
+                    btn.innerHTML = originalHtml;
+                    showAlert("خطأ", "فشل التحديث. تأكد من الإنترنت."); 
+                }
             } else {
                 globalStock = newStockData;
                 globalPrices = newPriceData;
+                globalDiscounts = newDiscountsData;
+                globalOldPrices = newOldPricesData;
+                globalDelivery = newDelData;
                 closeAdminDashboard();
+                btn.innerHTML = originalHtml;
+                updateDeliveryDropdown();
                 renderProducts();
                 updateUI();
             }
