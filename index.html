@@ -5,18 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>سمان ههيا | صحي وطازة</title>
 
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Google Fonts: Cairo -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
 
-    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <!-- Tailwind Config -->
     <script>
         tailwind.config = {
             theme: {
@@ -60,13 +56,11 @@
 </head>
 <body class="text-gray-800 antialiased selection:bg-brand-navy selection:text-white">
 
-    <!-- شريط الإعلان -->
     <div class="bg-red-600 text-white text-center py-2 font-black text-sm md:text-base z-40 relative shadow-sm">
         <i class="fa-solid fa-fire text-brand-yellow"></i> 
         متاح الآن حجز أوردرات (دفعة شهر 5) - الكمية محدودة!
     </div>
 
-    <!-- Navbar -->
     <nav class="bg-white shadow-sm sticky top-0 z-30 border-b-2 border-brand-yellow">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-center h-16 items-center">
@@ -78,7 +72,6 @@
         </div>
     </nav>
 
-    <!-- شريط السلة السفلي -->
     <div id="bottom-cart-bar" class="fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 shadow-[0_-10px_20px_rgba(0,0,0,0.08)] p-4 flex justify-between items-center z-40 transform translate-y-full transition-transform duration-300">
         <div class="flex flex-col">
             <span class="text-xs text-gray-500 font-bold">الإجمالي (بدون التوصيل)</span>
@@ -93,7 +86,6 @@
         </button>
     </div>
 
-    <!-- نافذة السلة الجانبية -->
     <div id="cart-overlay" class="fixed inset-0 bg-brand-navy/60 z-50 hidden opacity-0 transition-opacity duration-300 backdrop-blur-sm" onclick="toggleCart()"></div>
     <div id="cart-sidebar" class="fixed top-0 right-0 h-full w-full sm:w-96 bg-gray-50 shadow-2xl z-50 transform translate-x-full transition-transform duration-300 flex flex-col">
         <div class="p-4 border-b border-gray-200 flex justify-between items-center bg-white">
@@ -156,7 +148,6 @@
         </div>
     </div>
 
-    <!-- Alert Modal -->
     <div id="alert-modal" class="fixed inset-0 bg-brand-navy/80 z-[60] hidden opacity-0 transition-opacity duration-300 flex items-center justify-center backdrop-blur-sm">
         <div class="bg-white rounded-2xl p-6 w-11/12 max-w-sm text-center shadow-2xl transform scale-95 transition-transform duration-300" id="alert-box">
             <div class="w-16 h-16 bg-brand-light text-brand-cyanDark rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
@@ -168,7 +159,6 @@
         </div>
     </div>
 
-    <!-- Admin Modals -->
     <div id="admin-login-modal" class="fixed inset-0 bg-brand-navy/90 z-[70] hidden opacity-0 transition-opacity duration-300 flex items-center justify-center backdrop-blur-sm">
         <div class="bg-white rounded-2xl p-6 w-11/12 max-w-sm shadow-2xl">
             <div class="flex justify-between items-center mb-6">
@@ -211,7 +201,6 @@
     <section id="products" class="py-6">
         <div class="max-w-3xl mx-auto px-4 sm:px-6">
 
-            <!-- صورة دليل الأحجام -->
             <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden mb-8">
                 <div class="w-full h-auto bg-gray-100">
                     <img src="all-sizes.jpg" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'100\\' height=\\'100\\'><rect width=\\'100%\\' height=\\'100%\\' fill=\\'%23f1f5f9\\'/><text x=\\'50%\\' y=\\'50%\\' font-size=\\'12\\' font-weight=\\'bold\\' text-anchor=\\'middle\\' fill=\\'%2394a3b8\\'>صورة دليل الأحجام (all-sizes.jpg)</text></svg>'" class="w-full h-auto object-cover" alt="دليل أحجام سمان ههيا">
@@ -249,33 +238,25 @@
         </div>
     </footer>
 
-    <!-- Firebase Compat Libraries -->
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
-    <!-- JavaScript Logic -->
     <script>
-        // الأكواد الجديدة بالامتدادات اللي إنت ضفتها
         const productsInfo = {
             'super': { name: 'طبق سوبر', price: 100, weight: '300-350 جم', images: ['super.png'], isExtra: false },
             'jumbo': { name: 'طبق جامبو', price: 110, weight: '350-400 جم', images: ['jumbo.png'], isExtra: false },
             'special': { name: 'طبق سبشيال', price: 120, weight: '400-450 جم', images: ['special.png'], isExtra: false },
             'superspecial': { name: 'سوبر سبشيال', price: 130, weight: '450-500 جم', images: ['superspecial.png'], isExtra: false },
-            'eggs': { name: 'طبق بيض سمان', price: 50, weight: 'طبق 18 بيضة', images: ['eggs.jpg'], isExtra: true }, // حطيتلك الـ .jpg هنا
-            'chicks': { name: 'كتاكيت سمان', price: 8, weight: 'كتكوت', images: ['chicks.jpg'], isExtra: true } // وهنا كمان
+            'eggs': { name: 'طبق بيض سمان', price: 50, weight: 'طبق 18 بيضة', images: ['eggs.jpg'], isExtra: true },
+            'chicks': { name: 'كتاكيت سمان', price: 8, weight: 'كتكوت', images: ['chicks.jpg'], isExtra: true } 
         };
 
-        // المخزون العام اللي بييجي من الداتا بيز
         let globalStock = { 'super': 100, 'jumbo': 50, 'special': 30, 'superspecial': 10, 'eggs': 50, 'chicks': 200 };
-        // سلة العميل الحالية
         let cart = {};
         let db = null;
         let hasCloud = false;
 
-        // ==================================================
-        // 1. Helper Function: حساب المخزون المتاح بعد الخصم من السلة
-        // ==================================================
         function getAvailableStock(id) {
             const inCart = cart[id]?.quantity || 0;
             return Math.max(0, globalStock[id] - inCart);
@@ -333,9 +314,6 @@
             });
         }
 
-        // ==================================================
-        // 2. تحديث تصميم الأزرار بناءً على المخزون الذكي المتاح
-        // ==================================================
         window.getCardActionHTML = function(id) {
             const inCart = cart[id]?.quantity || 0;
             const available = getAvailableStock(id);
@@ -380,7 +358,6 @@
                 const available = getAvailableStock(id);
                 const stockBadgeClass = available <= 10 ? (available === 0 ? 'bg-red-50 text-red-600' : 'bg-orange-50 text-orange-600') : 'bg-green-50 text-green-700';
 
-                // تم التعديل هنا: شلنا الـ .jpg الاوتوماتيك عشان يقرا الصورة بـ png أو jpg حسب ما إنت كاتب
                 const cardHtml = `
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden flex flex-row h-[130px] relative">
                     <div class="p-3 flex-1 flex flex-col justify-between bg-white min-w-0">
@@ -431,9 +408,6 @@
             });
         };
 
-        // ==================================================
-        // 3. تحديثات ذكية للإضافة والتعديل بناءً على المخزون الفعلي
-        // ==================================================
         window.addToCart = function(id) {
             const available = getAvailableStock(id);
             if (available <= 0) {
@@ -571,6 +545,13 @@
             const customerAddress = document.getElementById('customer-address').value.trim();
             const deliverySelect = document.getElementById('delivery-zone');
 
+            // تحقق من جودة الاسم المكتوب (حروف فقط ولا يقل عن 3 أحرف)
+            const nameRegex = /^[\u0600-\u06FF\sA-Za-z]+$/;
+            if (customerName.length < 3 || !nameRegex.test(customerName)) {
+                showAlert("تنبيه", "يرجى كتابة اسم صحيح وخالي من الأرقام والرموز.");
+                return;
+            }
+
             const zoneNameOriginal = deliverySelect.options[deliverySelect.selectedIndex].text;
             const zoneName = zoneNameOriginal.includes('مكان آخر') ? 'مكان آخر' : zoneNameOriginal.split(' (')[0];
             const deliveryFee = parseInt(deliverySelect.value) || 0;
@@ -580,9 +561,6 @@
                 return;
             }
 
-            // ==================================================
-            // 4. حماية إضافية وقت الـ Checkout (Very Important)
-            // ==================================================
             for (let id in cart) {
                 if (cart[id].quantity > globalStock[id]) {
                     showAlert("تنبيه", `المنتج ${productsInfo[id].name} لم يعد متوفر بهذه الكمية، لقد تم حجزه بواسطة عميل آخر للتو.`);
@@ -657,9 +635,6 @@
                     })
                 });
 
-                // ==================================================
-                // 5. خصم المخزون الحقيقي من Firebase (Cloud Update)
-                // ==================================================
                 if (hasCloud && db) {
                     let updates = {};
                     for (let id in cart) {
@@ -760,6 +735,8 @@
                 renderProducts();
             }
         };
+    </script>
+
     <div id="chat-icon" style="position:fixed; bottom:20px; right:20px; cursor:pointer; background:#25d366; border-radius:50%; padding:15px; box-shadow:0 4px 8px rgba(0,0,0,0.3); z-index:1000;">
   <img src="https://cdn-icons-png.flaticon.com/512/134/134914.png" width="30" alt="Chat">
 </div>
@@ -899,6 +876,6 @@
   }
 
 </script>
-
+    
 </body>
 </html>
