@@ -1,4 +1,4 @@
-```html
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -173,19 +173,19 @@
             </div>
 
             <button type="button" onclick="checkoutWhatsApp()" id="checkout-btn" class="w-full bg-green-500 hover:bg-green-600 text-white font-black py-4 px-4 rounded-xl transition-all flex justify-center items-center gap-2 shadow-md disabled:opacity-50 disabled:cursor-not-allowed transform hover:-translate-y-0.5" disabled>
-                <i class="fa-brands fa-whatsapp text-2xl"></i> تأكيد وإرسال عبر واتساب
+                <i class="fa-brands fa-whatsapp text-2xl" id="btn-icon"></i> <span id="btn-text">تأكيد وإرسال عبر واتساب</span>
             </button>
             <p id="checkout-hint" class="text-center text-xs text-red-500 mt-3 font-bold hidden"><i class="fa-solid fa-circle-info"></i> يرجى استكمال البيانات المطلوبة والمنطقة</p>
         </div>
     </div>
 
-    <div id="alert-modal" class="fixed inset-0 bg-brand-navy/80 z-[80] hidden opacity-0 transition-opacity duration-300 flex items-center justify-center backdrop-blur-sm">
+    <div id="alert-modal" class="fixed inset-0 bg-brand-navy/80 z-[60] hidden opacity-0 transition-opacity duration-300 flex items-center justify-center backdrop-blur-sm">
         <div class="bg-white rounded-2xl p-6 w-11/12 max-w-sm text-center shadow-2xl transform scale-95 transition-transform duration-300" id="alert-box">
             <div class="w-16 h-16 bg-brand-light text-brand-cyanDark rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
                 <i class="fa-solid fa-bell" id="alert-icon"></i>
             </div>
             <h3 class="text-xl font-black text-brand-navy mb-2" id="alert-title">تنبيه</h3>
-            <p class="text-gray-600 mb-6 font-semibold text-sm leading-relaxed" id="alert-message">الرسالة</p>
+            <p class="text-gray-600 mb-6 font-semibold text-sm" id="alert-message">الرسالة</p>
             <button onclick="closeAlert()" class="bg-brand-navy hover:bg-gray-800 text-white font-bold py-3 px-6 rounded-xl w-full transition-colors">حسناً</button>
         </div>
     </div>
@@ -234,7 +234,7 @@
 
             <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden mb-8">
                 <div class="w-full h-auto bg-gray-100">
-                    <img src="all-sizes.jpg" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'100\\' height=\\'100\\'><rect width=\\'100%\\' height=\\'100%\\' fill=\\'%23f1f5f9\\'/><text x=\\'50%\\' y=\\'50%\\' font-size=\\'12\\' font-weight=\\'bold\\' text-anchor=\\'middle\\' fill=\\'%2394a3b8\\'>صورة دليل الأحجام</text></svg>'" class="w-full h-auto object-cover" alt="دليل أحجام سمان ههيا">
+                    <img src="all-sizes.jpg" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'100\\' height=\\'100\\'><rect width=\\'100%\\' height=\\'100%\\' fill=\\'%23f1f5f9\\'/><text x=\\'50%\\' y=\\'50%\\' font-size=\\'12\\' font-weight=\\'bold\\' text-anchor=\\'middle\\' fill=\\'%2394a3b8\\'>صورة دليل الأحجام (all-sizes.jpg)</text></svg>'" class="w-full h-auto object-cover" alt="دليل أحجام سمان ههيا">
                 </div>
                 <div class="p-3 bg-brand-light/50 border-t border-gray-100 text-center">
                     <p class="text-brand-navy font-bold text-sm"><i class="fa-solid fa-circle-info text-brand-cyanDark"></i> دليل يوضح أحجام الأطباق المتوفرة لدينا</p>
@@ -269,7 +269,6 @@
         </div>
     </footer>
 
-    <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
@@ -288,7 +287,7 @@
         let cart = {};
         let db = null;
         let hasCloud = false;
-        let customerType = 'new'; // الوضع الافتراضي
+        let customerType = 'new'; 
 
         function getAvailableStock(id) {
             const inCart = cart[id]?.quantity || 0;
@@ -332,19 +331,24 @@
                 auth.onAuthStateChanged(user => {
                     if(user) { hasCloud = true; listenToStock(); } 
                 });
-            } catch (e) { console.log("Firebase not initialized"); }
+            } catch (e) { 
+                console.log("Firebase not initialized"); 
+            }
         }
 
         function listenToStock() {
             if(!db) return;
-            db.collection('inventory').doc('stock').onSnapshot(snapshot => {
+            const docRef = db.collection('inventory').doc('stock');
+            docRef.onSnapshot(snapshot => {
                 if (snapshot.exists) {
                     const data = snapshot.data();
                     for(let id in globalStock) if(data[id] !== undefined) globalStock[id] = data[id];
                 }
                 renderProducts(); 
                 updateUI();
-            }, error => { hasCloud = false; });
+            }, error => {
+                hasCloud = false; 
+            });
         }
 
         window.switchCustomerType = function(type) {
@@ -354,21 +358,27 @@
             const fieldsNew = document.getElementById('new-cust-fields');
             const fieldsOld = document.getElementById('old-cust-fields');
             const btn = document.getElementById('checkout-btn');
+            const btnIcon = document.getElementById('btn-icon');
+            const btnText = document.getElementById('btn-text');
 
             if (type === 'new') {
                 tabNew.className = "flex-1 py-2.5 rounded-lg bg-white shadow-sm font-black text-brand-navy text-sm transition-all";
                 tabOld.className = "flex-1 py-2.5 rounded-lg text-gray-500 font-bold text-sm transition-all hover:text-brand-navy";
                 fieldsNew.classList.remove('hidden');
                 fieldsOld.classList.add('hidden');
-                btn.innerHTML = '<i class="fa-brands fa-whatsapp text-2xl"></i> تأكيد وإرسال عبر واتساب';
+                
                 btn.className = "w-full bg-green-500 hover:bg-green-600 text-white font-black py-4 px-4 rounded-xl transition-all flex justify-center items-center gap-2 shadow-md disabled:opacity-50 disabled:cursor-not-allowed transform hover:-translate-y-0.5";
+                btnIcon.className = "fa-brands fa-whatsapp text-2xl";
+                btnText.innerText = "تأكيد وإرسال عبر واتساب";
             } else {
                 tabOld.className = "flex-1 py-2.5 rounded-lg bg-white shadow-sm font-black text-brand-navy text-sm transition-all";
                 tabNew.className = "flex-1 py-2.5 rounded-lg text-gray-500 font-bold text-sm transition-all hover:text-brand-navy";
                 fieldsOld.classList.remove('hidden');
                 fieldsNew.classList.add('hidden');
-                btn.innerHTML = '<i class="fa-solid fa-paper-plane text-2xl"></i> إرسال الطلب فوراً';
+                
                 btn.className = "w-full bg-brand-cyanDark hover:bg-brand-navy text-white font-black py-4 px-4 rounded-xl transition-all flex justify-center items-center gap-2 shadow-md disabled:opacity-50 disabled:cursor-not-allowed transform hover:-translate-y-0.5";
+                btnIcon.className = "fa-solid fa-bolt text-2xl";
+                btnText.innerText = "إرسال الأوردر فوراً";
             }
             updateUI();
         };
@@ -377,14 +387,24 @@
             const inCart = cart[id]?.quantity || 0;
             const available = getAvailableStock(id);
 
-            if (available === 0 && inCart === 0) return `<div class="w-full bg-gray-100 text-gray-400 font-bold py-2 rounded-xl text-sm border border-gray-200 text-center cursor-not-allowed">نفدت الكمية</div>`;
-            if (inCart > 0) return `<div class="flex items-center justify-between bg-brand-light/50 border border-brand-cyan/40 rounded-xl p-1 h-[40px]"><div onclick="updateQuantity('${id}', 1)" class="w-9 h-full bg-white text-brand-cyanDark rounded-lg shadow-sm font-black text-xl flex items-center justify-center cursor-pointer select-none active:scale-95 transition-all">+</div><span class="font-black text-brand-navy text-lg min-w-[28px] text-center select-none">${inCart}</span><div onclick="updateQuantity('${id}', -1)" class="w-9 h-full bg-white text-red-500 rounded-lg shadow-sm font-black text-2xl flex items-center justify-center cursor-pointer select-none active:scale-95 transition-all pb-1">-</div></div>`;
+            if (available === 0 && inCart === 0) {
+                return `<div class="w-full bg-gray-100 text-gray-400 font-bold py-2 rounded-xl text-sm border border-gray-200 text-center cursor-not-allowed">نفدت الكمية</div>`;
+            }
+            if (inCart > 0) {
+                return `
+                <div class="flex items-center justify-between bg-brand-light/50 border border-brand-cyan/40 rounded-xl p-1 h-[40px]">
+                    <div onclick="updateQuantity('${id}', 1)" class="w-9 h-full bg-white text-brand-cyanDark rounded-lg shadow-sm font-black text-xl flex items-center justify-center cursor-pointer select-none active:scale-95 transition-all">+</div>
+                    <span class="font-black text-brand-navy text-lg min-w-[28px] text-center select-none">${inCart}</span>
+                    <div onclick="updateQuantity('${id}', -1)" class="w-9 h-full bg-white text-red-500 rounded-lg shadow-sm font-black text-2xl flex items-center justify-center cursor-pointer select-none active:scale-95 transition-all pb-1">-</div>
+                </div>`;
+            }
             return `<div onclick="addToCart('${id}')" class="w-full bg-brand-cyanDark text-white hover:bg-brand-navy font-black py-2 rounded-xl transition-colors shadow-sm text-sm flex justify-center items-center gap-2 cursor-pointer select-none"><i class="fa-solid fa-plus"></i> إضافة للسلة</div>`;
         }
 
         window.renderProducts = function() {
             const container = document.getElementById('products-container');
             const extrasContainer = document.getElementById('extras-container');
+
             if(!container || !extrasContainer) return;
 
             if (container.children.length > 0 && !container.innerHTML.includes('جاري')) {
@@ -392,73 +412,163 @@
                     const available = getAvailableStock(id);
                     const stockDisplay = document.getElementById(`stock-display-${id}`);
                     if(stockDisplay) stockDisplay.innerText = available; 
+
                     const actionContainer = document.getElementById(`card-action-${id}`);
                     if(actionContainer) actionContainer.innerHTML = window.getCardActionHTML(id);
                 });
                 return;
             }
 
-            container.innerHTML = ''; extrasContainer.innerHTML = '';
+            container.innerHTML = ''; 
+            extrasContainer.innerHTML = '';
 
             Object.keys(productsInfo).forEach(id => {
                 const item = productsInfo[id];
                 const available = getAvailableStock(id);
                 const stockBadgeClass = available <= 10 ? (available === 0 ? 'bg-red-50 text-red-600' : 'bg-orange-50 text-orange-600') : 'bg-green-50 text-green-700';
 
-                const cardHtml = `<div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden flex flex-row h-[130px] relative"><div class="p-3 flex-1 flex flex-col justify-between bg-white min-w-0"><div><h3 class="text-sm md:text-base font-black text-brand-navy truncate mb-1">${item.name}</h3><div class="flex items-center gap-2 mb-1"><span class="font-black text-brand-cyanDark text-lg">${item.price} <span class="text-[10px] text-gray-400">ج.م</span></span><span class="bg-gray-50 text-gray-500 text-[10px] px-1.5 py-0.5 rounded border border-gray-200 font-bold whitespace-nowrap"><i class="fa-solid fa-scale-balanced mr-1"></i> ${item.weight}</span></div></div><div class="flex items-center justify-between mt-auto"><div id="stock-badge-${id}" class="text-[10px] font-bold px-1.5 py-0.5 rounded border ${stockBadgeClass} shrink-0">المتاح: <span id="stock-display-${id}">${available}</span></div><div class="w-28 shrink-0" id="card-action-${id}">${window.getCardActionHTML(id)}</div></div></div><div class="w-32 shrink-0 relative bg-gray-100 border-r border-gray-100"><img id="img-${id}" src="${item.images[0]}" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'100\\' height=\\'100\\'><rect width=\\'100%\\' height=\\'100%\\' fill=\\'%23f1f5f9\\'/><text x=\\'50%\\' y=\\'50%\\' font-size=\\'10\\' text-anchor=\\'middle\\' fill=\\'%2394a3b8\\'>صورة</text></svg>'" class="w-full h-full object-cover"></div></div>`;
+                const cardHtml = `
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden flex flex-row h-[130px] relative">
+                    <div class="p-3 flex-1 flex flex-col justify-between bg-white min-w-0">
+                        <div>
+                            <h3 class="text-sm md:text-base font-black text-brand-navy truncate mb-1">${item.name}</h3>
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="font-black text-brand-cyanDark text-lg">${item.price} <span class="text-[10px] text-gray-400">ج.م</span></span>
+                                <span class="bg-gray-50 text-gray-500 text-[10px] px-1.5 py-0.5 rounded border border-gray-200 font-bold whitespace-nowrap">
+                                    <i class="fa-solid fa-scale-balanced mr-1"></i> ${item.weight}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between mt-auto">
+                            <div id="stock-badge-${id}" class="text-[10px] font-bold px-1.5 py-0.5 rounded border ${stockBadgeClass} shrink-0">
+                                المتاح: <span id="stock-display-${id}">${available}</span>
+                            </div>
+                            <div class="w-28 shrink-0" id="card-action-${id}">
+                                ${window.getCardActionHTML(id)}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="w-32 shrink-0 relative bg-gray-100 border-r border-gray-100">
+                        <img id="img-${id}" src="${item.images[0]}" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'100\\' height=\\'100\\'><rect width=\\'100%\\' height=\\'100%\\' fill=\\'%23f1f5f9\\'/><text x=\\'50%\\' y=\\'50%\\' font-size=\\'10\\' text-anchor=\\'middle\\' fill=\\'%2394a3b8\\'>صورة</text></svg>'" class="w-full h-full object-cover">
+                    </div>
+                </div>`;
 
-                if (!item.isExtra) container.innerHTML += cardHtml;
-                else extrasContainer.innerHTML += `<div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden flex flex-row items-center p-2.5 gap-3 h-[90px]"><div class="flex-1 min-w-0"><h4 class="font-black text-brand-navy text-xs sm:text-sm truncate">${item.name}</h4><div class="text-brand-cyanDark font-black text-xs sm:text-sm mb-1">${item.price} ج <span class="text-[10px] text-gray-400 font-bold">/ ${item.weight}</span></div><div id="stock-badge-${id}" class="text-[10px] font-bold px-1.5 py-0.5 rounded inline-flex border ${stockBadgeClass} shrink-0">المتاح: <span id="stock-display-${id}">${available}</span></div></div><div class="w-28 shrink-0" id="card-action-${id}">${window.getCardActionHTML(id)}</div><div class="w-16 h-16 sm:w-20 sm:h-20 shrink-0 relative overflow-hidden rounded-xl border border-gray-100"><img id="img-${id}" src="${item.images[0]}" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'100\\' height=\\'100\\'><rect width=\\'100%\\' height=\\'100%\\' fill=\\'%23f8fafc\\'/><text x=\\'50%\\' y=\\'50%\\' font-size=\\'10\\' text-anchor=\\'middle\\' fill=\\'%2394a3b8\\'>قريباً</text></svg>'" class="w-full h-full object-cover"></div></div>`;
+                if (!item.isExtra) {
+                    container.innerHTML += cardHtml;
+                } else {
+                    const extraHtml = `
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden flex flex-row items-center p-2.5 gap-3 h-[90px]">
+                        <div class="flex-1 min-w-0">
+                            <h4 class="font-black text-brand-navy text-xs sm:text-sm truncate">${item.name}</h4>
+                            <div class="text-brand-cyanDark font-black text-xs sm:text-sm mb-1">${item.price} ج <span class="text-[10px] text-gray-400 font-bold">/ ${item.weight}</span></div>
+                            <div id="stock-badge-${id}" class="text-[10px] font-bold px-1.5 py-0.5 rounded inline-flex border ${stockBadgeClass} shrink-0">
+                                المتاح: <span id="stock-display-${id}">${available}</span>
+                            </div>
+                        </div>
+                        <div class="w-28 shrink-0" id="card-action-${id}">
+                            ${window.getCardActionHTML(id)}
+                        </div>
+                        <div class="w-16 h-16 sm:w-20 sm:h-20 shrink-0 relative overflow-hidden rounded-xl border border-gray-100">
+                            <img id="img-${id}" src="${item.images[0]}" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'100\\' height=\\'100\\'><rect width=\\'100%\\' height=\\'100%\\' fill=\\'%23f8fafc\\'/><text x=\\'50%\\' y=\\'50%\\' font-size=\\'10\\' text-anchor=\\'middle\\' fill=\\'%2394a3b8\\'>قريباً</text></svg>'" class="w-full h-full object-cover">
+                        </div>
+                    </div>`;
+                    extrasContainer.innerHTML += extraHtml;
+                }
             });
         };
 
         window.addToCart = function(id) {
-            if (getAvailableStock(id) <= 0) { showAlert("عذراً", "الكمية المتاحة لا تكفي حالياً."); return; }
-            if (cart[id]) cart[id].quantity++; else cart[id] = { quantity: 1, price: productsInfo[id].price, name: productsInfo[id].name };
-            updateUI(); renderProducts(); 
+            const available = getAvailableStock(id);
+            if (available <= 0) {
+                showAlert("عذراً", "الكمية المتاحة لا تكفي حالياً.");
+                return;
+            }
+            if (cart[id]) {
+                cart[id].quantity++;
+            } else {
+                cart[id] = { quantity: 1, price: productsInfo[id].price, name: productsInfo[id].name };
+            }
+            updateUI(); 
+            renderProducts(); 
         };
 
         window.updateQuantity = function(id, delta) {
             if (!cart[id]) return; 
+
             if (delta === 1) {
-                if (getAvailableStock(id) > 0) cart[id].quantity++; else showAlert("عذراً", "لا يوجد مخزون إضافي متاح.");
+                const available = getAvailableStock(id);
+                if (available > 0) {
+                    cart[id].quantity++;
+                } else {
+                    showAlert("عذراً", "لا يوجد مخزون إضافي متاح.");
+                }
             } else if (delta === -1) {
                 cart[id].quantity--; 
-                if (cart[id].quantity <= 0) delete cart[id]; 
+                if (cart[id].quantity <= 0) {
+                    delete cart[id]; 
+                }
             }
-            updateUI(); renderProducts(); 
+            updateUI(); 
+            renderProducts(); 
         };
 
         window.updateUI = function() {
             let totalItems = 0, subTotalPrice = 0;
             const cartItemsContainer = document.getElementById('cart-items');
             if(!cartItemsContainer) return;
+
             cartItemsContainer.innerHTML = '';
 
             for (let id in cart) {
-                const item = cart[id]; totalItems += item.quantity; subTotalPrice += item.quantity * item.price;
-                cartItemsContainer.innerHTML += `<div class="bg-white p-3 rounded-xl border border-gray-100 flex justify-between items-center shadow-sm"><div class="flex-1"><h4 class="font-bold text-brand-navy text-xs mb-1">${item.name}</h4><div class="text-brand-cyanDark font-black text-sm">${item.price} ج.م</div></div><div class="flex items-center gap-2 bg-gray-50 rounded-lg p-1 border border-gray-200 h-[36px]"><div onclick="updateQuantity('${id}', 1)" class="w-8 h-full bg-white text-brand-navy rounded shadow-sm font-black text-lg flex items-center justify-center cursor-pointer select-none active:scale-95 transition-all">+</div><span class="font-black text-brand-navy min-w-[24px] text-center text-sm select-none">${item.quantity}</span><div onclick="updateQuantity('${id}', -1)" class="w-8 h-full bg-white text-red-500 rounded shadow-sm font-black text-xl flex items-center justify-center pb-1 cursor-pointer select-none active:scale-95 transition-all">-</div></div></div>`;
+                const item = cart[id];
+                totalItems += item.quantity;
+                subTotalPrice += item.quantity * item.price;
+
+                cartItemsContainer.innerHTML += `
+                    <div class="bg-white p-3 rounded-xl border border-gray-100 flex justify-between items-center shadow-sm">
+                        <div class="flex-1">
+                            <h4 class="font-bold text-brand-navy text-xs mb-1">${item.name}</h4>
+                            <div class="text-brand-cyanDark font-black text-sm">${item.price} ج.م</div>
+                        </div>
+                        <div class="flex items-center gap-2 bg-gray-50 rounded-lg p-1 border border-gray-200 h-[36px]">
+                            <div onclick="updateQuantity('${id}', 1)" class="w-8 h-full bg-white text-brand-navy rounded shadow-sm font-black text-lg flex items-center justify-center cursor-pointer select-none active:scale-95 transition-all">+</div>
+                            <span class="font-black text-brand-navy min-w-[24px] text-center text-sm select-none">${item.quantity}</span>
+                            <div onclick="updateQuantity('${id}', -1)" class="w-8 h-full bg-white text-red-500 rounded shadow-sm font-black text-xl flex items-center justify-center pb-1 cursor-pointer select-none active:scale-95 transition-all">-</div>
+                        </div>
+                    </div>`;
             }
 
             const bottomBar = document.getElementById('bottom-cart-bar');
             if(bottomBar) {
-                document.getElementById('bottom-cart-total').innerText = subTotalPrice; document.getElementById('bottom-cart-count').innerText = totalItems;
-                if (totalItems > 0) bottomBar.classList.remove('translate-y-full'); else { bottomBar.classList.add('translate-y-full'); cartItemsContainer.innerHTML = `<div class="flex flex-col items-center justify-center py-10 text-gray-400 gap-3"><i class="fa-solid fa-basket-shopping text-5xl text-gray-200"></i><p class="font-bold text-sm">لم تقم باختيار أي أطباق</p></div>`; }
+                document.getElementById('bottom-cart-total').innerText = subTotalPrice;
+                document.getElementById('bottom-cart-count').innerText = totalItems;
+
+                if (totalItems > 0) {
+                    bottomBar.classList.remove('translate-y-full');
+                } else {
+                    bottomBar.classList.add('translate-y-full');
+                    cartItemsContainer.innerHTML = `<div class="flex flex-col items-center justify-center py-10 text-gray-400 gap-3"><i class="fa-solid fa-basket-shopping text-5xl text-gray-200"></i><p class="font-bold text-sm">لم تقم باختيار أي أطباق</p></div>`;
+                }
             }
 
             const deliverySelect = document.getElementById('delivery-zone');
             const deliveryFee = deliverySelect ? (parseInt(deliverySelect.value) || 0) : 0;
             const finalTotal = subTotalPrice + deliveryFee;
 
-            if(document.getElementById('cart-subtotal')) document.getElementById('cart-subtotal').innerText = subTotalPrice;
-            if(document.getElementById('cart-delivery-fee')) {
+            const subTotalEl = document.getElementById('cart-subtotal');
+            const delFeeEl = document.getElementById('cart-delivery-fee');
+            const totalEl = document.getElementById('cart-total');
+
+            if(subTotalEl) subTotalEl.innerText = subTotalPrice;
+
+            if(delFeeEl) {
                 if(deliverySelect && deliverySelect.value === "0" && deliverySelect.options[deliverySelect.selectedIndex].text.includes("مكان آخر")) {
-                    document.getElementById('cart-delivery-fee').innerText = "يحدد لاحقاً";
+                    delFeeEl.innerText = "يحدد لاحقاً";
                 } else {
-                    document.getElementById('cart-delivery-fee').innerText = deliveryFee + " ج.م";
+                    delFeeEl.innerText = deliveryFee + " ج.م";
                 }
             }
-            if(document.getElementById('cart-total')) document.getElementById('cart-total').innerText = finalTotal;
+            if(totalEl) totalEl.innerText = finalTotal;
 
             const checkoutBtn = document.getElementById('checkout-btn');
             const checkoutHint = document.getElementById('checkout-hint');
@@ -468,29 +578,52 @@
                     if (customerType === 'new') {
                         const name = document.getElementById('customer-name').value.trim();
                         const phone = document.getElementById('customer-phone-new').value.trim();
-                        if (name.length >= 3 && phone.length >= 10) { checkoutBtn.disabled = false; checkoutHint.classList.add('hidden'); } else { checkoutBtn.disabled = true; checkoutHint.classList.remove('hidden'); }
+                        if (name.length >= 3 && phone.length >= 10) { 
+                            checkoutBtn.disabled = false; 
+                            checkoutHint.classList.add('hidden'); 
+                        } else { 
+                            checkoutBtn.disabled = true; 
+                            checkoutHint.classList.remove('hidden'); 
+                        }
                     } else {
                         const phone = document.getElementById('customer-phone-old').value.trim();
-                        if (phone.length >= 10) { checkoutBtn.disabled = false; checkoutHint.classList.add('hidden'); } else { checkoutBtn.disabled = true; checkoutHint.classList.remove('hidden'); }
+                        if (phone.length >= 10) { 
+                            checkoutBtn.disabled = false; 
+                            checkoutHint.classList.add('hidden'); 
+                        } else { 
+                            checkoutBtn.disabled = true; 
+                            checkoutHint.classList.remove('hidden'); 
+                        }
                     }
-                } else { checkoutBtn.disabled = true; checkoutHint.classList.remove('hidden'); }
+                } else { 
+                    checkoutBtn.disabled = true; 
+                    checkoutHint.classList.remove('hidden'); 
+                }
             }
         };
 
         window.toggleCart = function() {
-            const sidebar = document.getElementById('cart-sidebar'); const overlay = document.getElementById('cart-overlay');
+            const sidebar = document.getElementById('cart-sidebar');
+            const overlay = document.getElementById('cart-overlay');
             if(!sidebar || !overlay) return;
+
             if (sidebar.classList.contains('translate-x-full')) {
-                sidebar.classList.remove('translate-x-full'); overlay.classList.remove('hidden'); setTimeout(() => overlay.classList.remove('opacity-0'), 10); document.body.style.overflow = 'hidden';
+                sidebar.classList.remove('translate-x-full'); 
+                overlay.classList.remove('hidden');
+                setTimeout(() => overlay.classList.remove('opacity-0'), 10); 
+                document.body.style.overflow = 'hidden';
             } else {
-                sidebar.classList.add('translate-x-full'); overlay.classList.add('opacity-0'); setTimeout(() => overlay.classList.add('hidden'), 300); document.body.style.overflow = '';
+                sidebar.classList.add('translate-x-full'); 
+                overlay.classList.add('opacity-0');
+                setTimeout(() => overlay.classList.add('hidden'), 300); 
+                document.body.style.overflow = '';
             }
         };
 
         window.checkoutWhatsApp = async function() {
             const isNew = customerType === 'new';
             const deliverySelect = document.getElementById('delivery-zone');
-            const zoneNameOriginal = deliverySelect.options[deliverySelect.selectedIndex]?.text || '';
+            const zoneNameOriginal = deliverySelect.options[deliverySelect.selectedIndex].text;
             const zoneName = zoneNameOriginal.includes('مكان آخر') ? 'مكان آخر' : zoneNameOriginal.split(' (')[0];
             const deliveryFee = parseInt(deliverySelect.value) || 0;
 
@@ -502,7 +635,10 @@
                 customerAddress = document.getElementById('customer-address').value.trim();
                 
                 const nameRegex = /^[\u0600-\u06FF\sA-Za-z]+$/;
-                if (customerName.length < 3 || !nameRegex.test(customerName)) { showAlert("تنبيه", "يرجى كتابة اسم صحيح وخالي من الأرقام والرموز."); return; }
+                if (customerName.length < 3 || !nameRegex.test(customerName)) {
+                    showAlert("تنبيه", "يرجى كتابة اسم صحيح وخالي من الأرقام والرموز.");
+                    return;
+                }
             } else {
                 customerPhone = document.getElementById('customer-phone-old').value.trim();
                 customerName = "عميل سابق (" + customerPhone + ")";
@@ -513,14 +649,19 @@
                     showAlert("تنبيه", `المنتج ${productsInfo[id].name} لم يعد متوفر بهذه الكمية، لقد تم حجزه بواسطة عميل آخر للتو.`);
                     cart[id].quantity = globalStock[id];
                     if(cart[id].quantity === 0) delete cart[id];
-                    updateUI(); renderProducts(); return;
+                    updateUI();
+                    renderProducts();
+                    return;
                 }
             }
 
             const now = new Date();
-            const orderDate = now.toLocaleDateString('ar-EG'); const orderTime = now.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
+            const orderDate = now.toLocaleDateString('ar-EG');
+            const orderTime = now.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
             const web3FormsKey = "d8e4b3fe-018c-4c39-b15f-191ccc7cf10c"; 
+
             let subTotal = 0;
+            let itemsSummaryArray = [];
 
             let message = "السلام عليكم، أريد تأكيد حجزي في *(دفعة شهر 5)*:\n\n";
             message += `📋 *بيانات العميل:*\n`;
@@ -530,7 +671,8 @@
             } else {
                 message += `🔁 عميل سابق\n📱 الموبايل المسجل: ${customerPhone}\n📍 المنطقة: ${zoneName}\n`;
             }
-            message += `🕒 وقت الطلب: ${orderDate} - ${orderTime}\n\n🛒 *الطلبات:*\n`;
+            message += `🕒 وقت الطلب: ${orderDate} - ${orderTime}\n\n`;
+            message += `🛒 *الطلبات:*\n`;
 
             let orderDetailsForTickTick = "";
             if (isNew) {
@@ -542,15 +684,31 @@
             orderDetailsForTickTick += `وقت الطلب: ${orderDate} - ${orderTime}\n\nالطلبات:\n`;
 
             for (let id in cart) {
-                const item = cart[id]; const itemTotal = item.quantity * item.price; subTotal += itemTotal;
-                message += `▪️ ${item.name}\n  └ ${item.quantity} × ${item.price} = ${itemTotal} ج.م\n`;
+                const item = cart[id];
+                const itemTotal = item.quantity * item.price;
+                subTotal += itemTotal;
+
+                // تجهيز ملخص الأوردر عشان عنوان تيك تيك (مثال: 3 جامبو، 5 سوبر)
+                let shortName = item.name.replace('طبق ', '').split(' (')[0];
+                itemsSummaryArray.push(`${item.quantity} ${shortName}`);
+
+                message += `▪️ ${item.name}\n`;
+                message += `  └ ${item.quantity} × ${item.price} = ${itemTotal} ج.م\n`;
+
                 orderDetailsForTickTick += `▪️ ${item.name}\n  └ ${item.quantity} × ${item.price} = ${itemTotal} ج.م\n`;
             }
 
             const finalTotal = subTotal + deliveryFee;
             const deliveryText = (deliveryFee === 0 && zoneName === 'مكان آخر') ? "يحدد لاحقاً" : `${deliveryFee} ج.م`;
 
-            message += `\n═════════════════\n📦 قيمة الطلبات: ${subTotal} ج.م\n🚚 رسوم التوصيل: ${deliveryText}\n💰 *الإجمالي النهائي: ${finalTotal} ج.م*\n`;
+            // تجهيز عنوان تيك تيك اللي هيظهرلك من برة ويقولك الصنف والعدد
+            let itemsString = itemsSummaryArray.join('، ');
+            let tickTickSubject = `🛒 ${isNew ? 'عميل جديد' : 'عميل سابق'}: ${itemsString}`;
+
+            message += `\n═════════════════\n`;
+            message += `📦 قيمة الطلبات: ${subTotal} ج.م\n`;
+            message += `🚚 رسوم التوصيل: ${deliveryText}\n`;
+            message += `💰 *الإجمالي النهائي: ${finalTotal} ج.م*\n`;
 
             if(deliveryFee === 0 && zoneName === 'مكان آخر') {
                 message += `*(الإجمالي غير شامل رسوم التوصيل)*\n`;
@@ -559,35 +717,50 @@
                 orderDetailsForTickTick += `\nالإجمالي النهائي: ${finalTotal} ج.م`;
             }
 
-            const checkoutBtn = document.getElementById('checkout-btn'); const originalBtnHtml = checkoutBtn.innerHTML;
+            message += `\n(في انتظار تأكيد الحجز وموعد الاستلام)`;
+
+            const checkoutBtn = document.getElementById('checkout-btn');
+            const originalBtnHtml = checkoutBtn.innerHTML;
             checkoutBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-2xl"></i> جاري تسجيل الطلب...';
 
             try {
                 await fetch('https://api.web3forms.com/submit', {
-                    method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
                     body: JSON.stringify({
                         access_key: web3FormsKey,
-                        subject: isNew ? `أوردر جديد 🛒: ${customerName}` : `🔁 أوردر عميل سابق: ${customerPhone}`,
+                        subject: tickTickSubject,
                         "التفاصيل": orderDetailsForTickTick
                     })
                 });
 
                 if (hasCloud && db) {
                     let updates = {};
-                    for (let id in cart) updates[id] = firebase.firestore.FieldValue.increment(-cart[id].quantity);
+                    for (let id in cart) {
+                        updates[id] = firebase.firestore.FieldValue.increment(-cart[id].quantity);
+                    }
                     await db.collection('inventory').doc('stock').update(updates);
                 }
-            } catch(e) { console.log("Sync Error", e); }
+
+            } catch(e) { 
+                console.log("Sync Error", e); 
+            }
 
             cart = {}; 
             if (isNew) {
-                document.getElementById('customer-name').value = ""; document.getElementById('customer-phone-new').value = ""; document.getElementById('customer-address').value = "";
+                document.getElementById('customer-name').value = "";
+                document.getElementById('customer-phone-new').value = "";
+                document.getElementById('customer-address').value = "";
             } else {
-                document.getElementById('customer-phone-old').value = ""; document.getElementById('optional-whatsapp').checked = false;
+                document.getElementById('customer-phone-old').value = "";
+                document.getElementById('optional-whatsapp').checked = false;
             }
-            document.getElementById('delivery-zone').value = ""; updateUI(); renderProducts(); toggleCart(); checkoutBtn.innerHTML = originalBtnHtml; 
+            document.getElementById('delivery-zone').value = ""; 
+            updateUI(); 
+            renderProducts();
+            toggleCart();
+            checkoutBtn.innerHTML = originalBtnHtml; 
 
-            // التحويل للواتساب أو إظهار رسالة النجاح
             const wantsWhatsApp = document.getElementById('optional-whatsapp')?.checked;
             
             if (isNew || wantsWhatsApp) {
@@ -598,98 +771,81 @@
         };
 
         window.showAlert = function(title, message) {
-            document.getElementById('alert-title').innerText = title; document.getElementById('alert-message').innerText = message;
-            const modal = document.getElementById('alert-modal'); const box = document.getElementById('alert-box');
+            document.getElementById('alert-title').innerText = title; 
+            document.getElementById('alert-message').innerText = message;
+            const modal = document.getElementById('alert-modal');
+            const box = document.getElementById('alert-box');
             if(!modal || !box) return;
-            modal.classList.remove('hidden'); setTimeout(() => { modal.classList.remove('opacity-0'); box.classList.remove('scale-95'); box.classList.add('scale-100'); }, 10);
+            modal.classList.remove('hidden');
+            setTimeout(() => { modal.classList.remove('opacity-0'); box.classList.remove('scale-95'); box.classList.add('scale-100'); }, 10);
         };
         window.closeAlert = function() {
-            const modal = document.getElementById('alert-modal'); const box = document.getElementById('alert-box');
+            const modal = document.getElementById('alert-modal');
+            const box = document.getElementById('alert-box');
             if(!modal || !box) return;
-            modal.classList.add('opacity-0'); box.classList.remove('scale-100'); box.classList.add('scale-95');
+            modal.classList.add('opacity-0'); 
+            box.classList.remove('scale-100'); 
+            box.classList.add('scale-95');
             setTimeout(() => modal.classList.add('hidden'), 300);
         };
-        window.openAdminLogin = function() { const modal = document.getElementById('admin-login-modal'); if(!modal) return; modal.classList.remove('hidden'); setTimeout(() => modal.classList.remove('opacity-0'), 10); document.getElementById('admin-pin').value = ''; };
-        window.closeAdminLogin = function() { const modal = document.getElementById('admin-login-modal'); if(!modal) return; modal.classList.add('opacity-0'); setTimeout(() => modal.classList.add('hidden'), 300); };
-        window.verifyAdminPin = function() { if (document.getElementById('admin-pin').value === '1234') { closeAdminLogin(); openAdminDashboard(); } else showAlert("خطأ", "الرمز السري غير صحيح!"); };
-        window.openAdminDashboard = function() {
-            const container = document.getElementById('admin-inputs-container'); if(!container) return; container.innerHTML = '';
-            Object.keys(productsInfo).forEach(id => { container.innerHTML += `<div class="flex justify-between items-center bg-gray-50 p-3 rounded-xl border border-gray-200"><span class="font-bold text-brand-navy text-sm">${productsInfo[id].name}</span><div class="flex items-center gap-2"><input type="number" id="admin-input-${id}" value="${globalStock[id]}" class="w-16 text-center border border-gray-300 rounded-lg p-1.5 font-black text-brand-cyanDark focus:border-brand-cyan outline-none"></div></div>`; });
-            const modal = document.getElementById('admin-dashboard-modal'); modal.classList.remove('hidden'); setTimeout(() => modal.classList.remove('opacity-0'), 10);
+
+        window.openAdminLogin = function() {
+            const modal = document.getElementById('admin-login-modal'); 
+            if(!modal) return;
+            modal.classList.remove('hidden');
+            setTimeout(() => modal.classList.remove('opacity-0'), 10); 
+            document.getElementById('admin-pin').value = '';
         };
-        window.closeAdminDashboard = function() { const modal = document.getElementById('admin-dashboard-modal'); if(!modal) return; modal.classList.add('opacity-0'); setTimeout(() => modal.classList.add('hidden'), 300); };
+        window.closeAdminLogin = function() {
+            const modal = document.getElementById('admin-login-modal'); 
+            if(!modal) return;
+            modal.classList.add('opacity-0');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        };
+        window.verifyAdminPin = function() {
+            if (document.getElementById('admin-pin').value === '1234') { closeAdminLogin(); openAdminDashboard(); }
+            else showAlert("خطأ", "الرمز السري غير صحيح!");
+        };
+        window.openAdminDashboard = function() {
+            const container = document.getElementById('admin-inputs-container'); 
+            if(!container) return;
+            container.innerHTML = '';
+            Object.keys(productsInfo).forEach(id => {
+                container.innerHTML += `
+                    <div class="flex justify-between items-center bg-gray-50 p-3 rounded-xl border border-gray-200">
+                        <span class="font-bold text-brand-navy text-sm">${productsInfo[id].name}</span>
+                        <div class="flex items-center gap-2"><input type="number" id="admin-input-${id}" value="${globalStock[id]}" class="w-16 text-center border border-gray-300 rounded-lg p-1.5 font-black text-brand-cyanDark focus:border-brand-cyan outline-none"></div>
+                    </div>`;
+            });
+            const modal = document.getElementById('admin-dashboard-modal'); 
+            modal.classList.remove('hidden');
+            setTimeout(() => modal.classList.remove('opacity-0'), 10);
+        };
+        window.closeAdminDashboard = function() {
+            const modal = document.getElementById('admin-dashboard-modal'); 
+            if(!modal) return;
+            modal.classList.add('opacity-0');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        };
         window.saveStockToCloud = async function() {
             let newStockData = {};
-            Object.keys(productsInfo).forEach(id => { const val = parseInt(document.getElementById(`admin-input-${id}`).value); newStockData[id] = isNaN(val) ? 0 : Math.max(0, val); });
-            if (hasCloud && db) { try { await db.collection('inventory').doc('stock').set(newStockData); closeAdminDashboard(); showAlert("تم بنجاح", "تم تحديث أرصدة المخزون وسيظهر للعملاء فوراً."); } catch(e) { showAlert("خطأ", "فشل التحديث. تأكد من الإنترنت."); } } else { globalStock = newStockData; closeAdminDashboard(); renderProducts(); }
+            Object.keys(productsInfo).forEach(id => {
+                const val = parseInt(document.getElementById(`admin-input-${id}`).value);
+                newStockData[id] = isNaN(val) ? 0 : Math.max(0, val);
+            });
+            if (hasCloud && db) {
+                try { 
+                    await db.collection('inventory').doc('stock').set(newStockData); 
+                    closeAdminDashboard(); 
+                    showAlert("تم بنجاح", "تم تحديث أرصدة المخزون وسيظهر للعملاء فوراً."); 
+                } 
+                catch(e) { showAlert("خطأ", "فشل التحديث. تأكد من الإنترنت."); }
+            } else {
+                globalStock = newStockData;
+                closeAdminDashboard();
+                renderProducts();
+            }
         };
-    </script>
-
-    <!-- Chat Box UI -->
-    <div id="chat-icon" onclick="document.getElementById('chat-box').style.display='flex'; document.getElementById('chat-icon').style.display='none';" style="position:fixed; bottom:24px; right:24px; cursor:pointer; background:#25d366; border-radius:50%; padding:15px; box-shadow:0 10px 25px rgba(37,211,102,0.4); z-index:1000; transition: transform 0.3s; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
-        <i class="fa-brands fa-whatsapp text-white text-3xl"></i>
-    </div>
-
-    <div id="chat-box" style="display:none; position:fixed; bottom:24px; right:24px; width:340px; height:450px; background:white; border:1px solid #e2e8f0; border-radius:20px; flex-direction:column; z-index:1000; box-shadow:0 20px 40px rgba(0,0,0,0.15); font-family: 'Cairo', sans-serif; overflow: hidden;">
-        
-        <div style="background:#25d366; color:white; padding:15px 20px; font-weight:bold; display:flex; justify-content:space-between; align-items:center;">
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <div style="background: white; border-radius: 50%; padding: 5px; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center;">
-                    <i class="fa-brands fa-whatsapp text-[#25d366] text-xl"></i>
-                </div>
-                <div>
-                    <span style="display: block; font-size: 15px;">خدمة عملاء السمان 🦆</span>
-                    <span style="font-size: 10px; opacity: 0.9;">متاح للرد فوراً</span>
-                </div>
-            </div>
-            <span onclick="document.getElementById('chat-box').style.display='none'; document.getElementById('chat-icon').style.display='flex';" style="cursor:pointer; font-size: 20px;">✖</span>
-        </div>
-
-        <div id="messages" style="flex:1; padding:20px; overflow-y:auto; background:#e5ddd5; display:flex; flex-direction:column; gap:12px;">
-            <div style="align-self:flex-start; background:white; padding:10px 15px; border-radius:0 15px 15px 15px; font-size:14px; max-width:85%; font-weight: 600; box-shadow: 0 1px 2px rgba(0,0,0,0.1); color: #1e293b;">
-                أهلاً بك في مزرعة سمان ههيا 😊<br>
-                لو عندك أي استفسار أو مشكلة في الطلب، اكتبها هنا.
-            </div>
-        </div>
-
-        <div style="padding:15px; background: #f0f2f5; display:flex; gap:10px; align-items: center;">
-            <input 
-                id="user-input" 
-                type="text" 
-                placeholder="اكتب رسالتك..." 
-                style="flex:1; border:none; padding:12px 15px; border-radius:25px; outline:none; font-family: 'Cairo', sans-serif; font-size: 14px;"
-                onkeypress="if(event.key === 'Enter') sendMessage()"
-            >
-            <button 
-                onclick="sendMessage()" 
-                style="background:#25d366; color:white; border:none; width:40px; height: 40px; border-radius:50%; cursor:pointer; display: flex; align-items: center; justify-content: center; transition: transform 0.2s;"
-                onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
-                <i class="fa-solid fa-paper-plane text-sm"></i>
-            </button>
-        </div>
-    </div>
-
-    <script>
-        window.sendMessage = function() {
-            const input = document.getElementById('user-input');
-            const msg = input.value.trim();
-            if(!msg) return;
-            const messages = document.getElementById('messages');
-            
-            // رسالة العميل
-            messages.innerHTML += `<div style="align-self:flex-end; background:#dcf8c6; padding:10px 15px; border-radius:15px 0 15px 15px; font-size:14px; max-width:85%; font-weight: 600; box-shadow: 0 1px 2px rgba(0,0,0,0.1); color: #1e293b; margin-top:5px;">${msg}</div>`;
-            input.value = '';
-            messages.scrollTop = messages.scrollHeight;
-            
-            // الرد الآلي
-            setTimeout(() => {
-                messages.innerHTML += `<div style="align-self:flex-start; background:white; padding:10px 15px; border-radius:0 15px 15px 15px; font-size:14px; max-width:85%; font-weight: 600; box-shadow: 0 1px 2px rgba(0,0,0,0.1); color: #1e293b; margin-top:5px; line-height: 1.6;">
-                    بشكرك على رسالتك! عشان أرد عليك بسرعة من فضلك اضغط على الزرار ده عشان يحولك للواتساب بتاعي مباشرة:<br>
-                    <a href="https://wa.me/201208027294" target="_blank" style="display: block; text-align: center; margin-top: 10px; background: #25d366; color: white; padding: 8px; border-radius: 10px; text-decoration: none;">محادثة واتساب الآن <i class="fa-solid fa-arrow-left mr-1"></i></a>
-                </div>`;
-                messages.scrollTop = messages.scrollHeight;
-            }, 1000);
-        }
     </script>
 </body>
 </html>
