@@ -760,90 +760,144 @@
                 renderProducts();
             }
         };
-    </script>
-
-  <div id="chat-icon" style="position:fixed; bottom:20px; right:20px; cursor:pointer; background:#25d366; border-radius:50%; padding:15px; box-shadow:0 4px 8px rgba(0,0,0,0.3); z-index:1000; transition: transform 0.2s;">
+    <div id="chat-icon" style="position:fixed; bottom:20px; right:20px; cursor:pointer; background:#25d366; border-radius:50%; padding:15px; box-shadow:0 4px 8px rgba(0,0,0,0.3); z-index:1000;">
   <img src="https://cdn-icons-png.flaticon.com/512/134/134914.png" width="30" alt="Chat">
 </div>
 
 <div id="chat-box" style="display:none; position:fixed; bottom:80px; right:20px; width:320px; height:450px; background:white; border:1px solid #ddd; border-radius:15px; flex-direction:column; z-index:1000; box-shadow:0 8px 16px rgba(0,0,0,0.2); font-family: Arial, sans-serif;">
   
-  <div style="background:#25d366; color:white; padding:15px; border-radius:15px 15px 0 0; font-weight:bold; display:flex; justify-content:space-between; align-items: center;">
-    <span>مساعد سمان ههيا 🦆</span>
-    <span onclick="document.getElementById('chat-box').style.display='none'" style="cursor:pointer; font-size: 18px;">✖</span>
+  <div style="background:#25d366; color:white; padding:15px; border-radius:15px 15px 0 0; font-weight:bold; display:flex; justify-content:space-between; align-items:center;">
+    <span>مساعد سمان ههيا الذكي 🦆</span>
+    <span onclick="document.getElementById('chat-box').style.display='none'" style="cursor:pointer;">✖</span>
   </div>
-  
+
   <div id="messages" style="flex:1; padding:15px; overflow-y:auto; background:#f9f9f9; display:flex; flex-direction:column; gap:10px;">
-    <div style="align-self:flex-start; background:#eee; padding:8px 12px; border-radius:10px; font-size:14px; max-width: 80%;">
-      أهلاً بك في مزرعة سمان ههيا! تؤمرني بإيه النهاردة؟ 😊
+    
+    <div style="align-self:flex-start; background:#eee; padding:8px 12px; border-radius:10px; font-size:14px; max-width:80%;">
+      أهلاً بك في مزرعة سمان ههيا 😊<br>
+      اسألني أي سؤال عن الأسعار أو الطلبات أو التربية.
     </div>
+
   </div>
-  
-  <div style="padding:10px; border-top:1px solid #eee; display:flex; gap:5px; background: white; border-radius: 0 0 15px 15px;">
-    <input id="user-input" type="text" placeholder="اكتب سؤالك هنا..." style="flex:1; border:1px solid #ddd; padding:8px; border-radius:5px; outline:none;">
-    <button onclick="sendMessage()" style="background:#25d366; color:white; border:none; padding:8px 15px; border-radius:5px; cursor:pointer; font-weight:bold;">إرسال</button>
+
+  <div style="padding:10px; border-top:1px solid #eee; display:flex; gap:5px;">
+    <input 
+      id="user-input" 
+      type="text" 
+      placeholder="اكتب سؤالك هنا..." 
+      style="flex:1; border:1px solid #ddd; padding:8px; border-radius:5px; outline:none;"
+      onkeypress="if(event.key === 'Enter') sendMessage()"
+    >
+
+    <button 
+      onclick="sendMessage()" 
+      style="background:#25d366; color:white; border:none; padding:8px 15px; border-radius:5px; cursor:pointer; font-weight:bold;">
+      إرسال
+    </button>
   </div>
 </div>
 
 <script>
-  // الرابط النهائي المربوط بـ n8n
-  const WEBHOOK_URL = "https://smanhhya.app.n8n.cloud/webhook/08901ca3-0635-4e6f-8767-ea64fc2d2324";
+
+  // رابط Webhook بتاع n8n
+  const WEBHOOK_URL = "https://smanhhya.app.n8n.cloud/webhook/chat";
 
   const chatIcon = document.getElementById('chat-icon');
   const chatBox = document.getElementById('chat-box');
   const messagesDiv = document.getElementById('messages');
-  const userInput = document.getElementById('user-input');
 
   // فتح وقفل الشات
   chatIcon.onclick = () => {
     chatBox.style.display = chatBox.style.display === 'none' ? 'flex' : 'none';
   };
 
-  // إرسال الرسالة بالضغط على Enter
-  userInput.addEventListener("keypress", function(event) {
-    if (event.key === "Enter") {
-      event.preventDefault();
-      sendMessage();
-    }
-  });
+  // إضافة رسالة
+  function addMessage(message, sender = 'bot') {
 
+    const msgDiv = document.createElement('div');
+
+    msgDiv.style.padding = '8px 12px';
+    msgDiv.style.borderRadius = '10px';
+    msgDiv.style.fontSize = '14px';
+    msgDiv.style.maxWidth = '80%';
+    msgDiv.style.wordWrap = 'break-word';
+
+    if(sender === 'user') {
+      msgDiv.style.alignSelf = 'flex-end';
+      msgDiv.style.background = '#dcf8c6';
+    } else {
+      msgDiv.style.alignSelf = 'flex-start';
+      msgDiv.style.background = '#eee';
+    }
+
+    msgDiv.innerHTML = message;
+
+    messagesDiv.appendChild(msgDiv);
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+  }
+
+  // إرسال الرسالة
   async function sendMessage() {
-    const msg = userInput.value.trim();
+
+    const input = document.getElementById('user-input');
+    const msg = input.value.trim();
+
     if (!msg) return;
 
-    // إظهار رسالة العميل في الشات
-    messagesDiv.innerHTML += `<div style="align-self:flex-end; background:#dcf8c6; padding:8px 12px; border-radius:10px; font-size:14px; max-width: 80%;">${msg}</div>`;
-    userInput.value = '';
-    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    // رسالة المستخدم
+    addMessage(msg, 'user');
 
-    // إظهار علامة "جاري الكتابة..."
-    const typingId = "typing-" + Date.now();
-    messagesDiv.innerHTML += `<div id="${typingId}" style="align-self:flex-start; background:#eee; padding:8px 12px; border-radius:10px; font-size:12px; color: #888; max-width: 80%;">المساعد يكتب... ✍️</div>`;
+    input.value = '';
+
+    // رسالة انتظار
+    const loadingDiv = document.createElement('div');
+
+    loadingDiv.style.alignSelf = 'flex-start';
+    loadingDiv.style.background = '#eee';
+    loadingDiv.style.padding = '8px 12px';
+    loadingDiv.style.borderRadius = '10px';
+    loadingDiv.style.fontSize = '14px';
+
+    loadingDiv.innerHTML = 'جاري الكتابة...';
+
+    messagesDiv.appendChild(loadingDiv);
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
 
     try {
+
       const response = await fetch(WEBHOOK_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: msg })
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          message: msg
+        })
       });
-      
-      const data = await response.json();
-      
-      // إزالة علامة "جاري الكتابة..."
-      document.getElementById(typingId).remove();
 
-      // استخراج الرد من n8n
-      const reply = data.text || "تحت أمرك يا فندم، ثواني وبكون معاك!";
-      
-      // إظهار رد البوت
-      messagesDiv.innerHTML += `<div style="align-self:flex-start; background:#eee; padding:8px 12px; border-radius:10px; font-size:14px; max-width: 80%; line-height: 1.5;">${reply}</div>`;
+      const data = await response.json();
+
+      // حذف رسالة الانتظار
+      loadingDiv.remove();
+
+      // الرد القادم من n8n
+      const reply = data.reply || "تحت أمرك 😊";
+
+      addMessage(reply, 'bot');
+
     } catch (error) {
-      document.getElementById(typingId).remove();
-      messagesDiv.innerHTML += `<div style="align-self:flex-start; background:#fee; color:red; padding:8px 12px; border-radius:10px; font-size:12px; max-width: 80%;">عذراً، حصل مشكلة في الاتصال. جرب تاني كمان شوية.</div>`;
+
+      loadingDiv.remove();
+
+      addMessage(
+        "عذراً، حصل مشكلة في الاتصال بالسيرفر. حاول مرة تانية.",
+        'bot'
+      );
+
+      console.error(error);
     }
-    messagesDiv.scrollTop = messagesDiv.scrollHeight;
   }
+
 </script>
 
 </body>
