@@ -1,4 +1,4 @@
-
+```html
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -190,10 +190,11 @@
         </div>
     </div>
 
+    <!-- نافذة الإدارة الجديدة للأسعار والمخزون -->
     <div id="admin-login-modal" class="fixed inset-0 bg-brand-navy/90 z-[70] hidden opacity-0 transition-opacity duration-300 flex items-center justify-center backdrop-blur-sm">
         <div class="bg-white rounded-2xl p-6 w-11/12 max-w-sm shadow-2xl">
             <div class="flex justify-between items-center mb-6">
-                <h3 class="text-xl font-black text-brand-navy flex items-center gap-2"><i class="fa-solid fa-lock text-brand-yellow"></i> إدارة المخزون</h3>
+                <h3 class="text-xl font-black text-brand-navy flex items-center gap-2"><i class="fa-solid fa-lock text-brand-yellow"></i> الإدارة</h3>
                 <button onclick="closeAdminLogin()" class="text-gray-400 hover:text-red-500 bg-gray-100 w-8 h-8 rounded-full"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <input type="password" id="admin-pin" class="w-full border-2 border-gray-200 rounded-xl p-4 mb-4 text-center text-2xl tracking-widest focus:border-brand-cyan outline-none font-bold text-brand-navy" placeholder="الرقم السري">
@@ -203,15 +204,17 @@
 
     <div id="admin-dashboard-modal" class="fixed inset-0 bg-gray-50 z-[80] hidden opacity-0 transition-opacity duration-300 flex flex-col">
         <div class="bg-white border-b border-gray-200 p-4 flex justify-between items-center shadow-sm">
-            <h2 class="text-lg font-black text-brand-navy"><i class="fa-solid fa-boxes-stacked text-brand-cyanDark"></i> تحديث المخزون الفعلي</h2>
+            <h2 class="text-lg font-black text-brand-navy"><i class="fa-solid fa-boxes-stacked text-brand-cyanDark"></i> تحديث الأسعار والمخزون</h2>
             <button onclick="closeAdminDashboard()" class="text-gray-500 hover:text-red-500"><i class="fa-solid fa-xmark text-xl"></i></button>
         </div>
         <div class="p-4 flex-1 overflow-y-auto">
             <div class="max-w-2xl mx-auto bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
                 <div id="connection-status" class="mb-6 p-3 rounded-lg text-sm font-bold bg-gray-100 text-gray-600 text-center">جاري الاتصال...</div>
-                <div id="admin-inputs-container" class="space-y-3"></div>
-                <button onclick="saveStockToCloud()" class="w-full mt-6 bg-brand-cyanDark hover:bg-blue-700 text-white font-black py-4 rounded-xl shadow-md flex justify-center items-center gap-2">
-                    <i class="fa-solid fa-check-double"></i> حفظ الأرصدة الجديدة
+                
+                <div id="admin-inputs-container" class="space-y-4"></div>
+                
+                <button onclick="saveStockToCloud()" class="w-full mt-6 bg-brand-cyanDark hover:bg-brand-navy text-white font-black py-4 rounded-xl shadow-md flex justify-center items-center gap-2 transition-colors">
+                    <i class="fa-solid fa-check-double text-xl"></i> حفظ التعديلات فوراً
                 </button>
             </div>
         </div>
@@ -262,7 +265,7 @@
             </div>
             <div class="text-sm flex gap-4 items-center">
                 <a href="tel:01208027294" class="hover:text-white transition-colors"><i class="fa-solid fa-phone text-brand-yellow"></i> 01208027294</a>
-                <button type="button" onclick="openAdminLogin()" class="text-gray-500 hover:text-white transition-colors" title="إدارة المخزون">
+                <button type="button" onclick="openAdminLogin()" class="text-gray-500 hover:text-white transition-colors" title="إدارة الموقع">
                     <i class="fa-solid fa-lock"></i>
                 </button>
             </div>
@@ -274,6 +277,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
     <script>
+        // هنا حطينا الأسعار كـ "افتراضي" لكنها هتتحدث من قاعدة البيانات
         const productsInfo = {
             'super': { name: 'طبق سوبر', price: 100, weight: '300-350 جم', images: ['super.png'], isExtra: false },
             'jumbo': { name: 'طبق جامبو', price: 110, weight: '350-400 جم', images: ['jumbo.png'], isExtra: false },
@@ -284,6 +288,11 @@
         };
 
         let globalStock = { 'super': 100, 'jumbo': 50, 'special': 30, 'superspecial': 10, 'eggs': 50, 'chicks': 200 };
+        
+        // مصفوفة الأسعار الذكية الجديدة
+        let globalPrices = {};
+        Object.keys(productsInfo).forEach(id => globalPrices[id] = productsInfo[id].price);
+
         let cart = {};
         let db = null;
         let hasCloud = false;
@@ -338,8 +347,9 @@
 
         function listenToStock() {
             if(!db) return;
-            const docRef = db.collection('inventory').doc('stock');
-            docRef.onSnapshot(snapshot => {
+            
+            // قراءة المخزون
+            db.collection('inventory').doc('stock').onSnapshot(snapshot => {
                 if (snapshot.exists) {
                     const data = snapshot.data();
                     for(let id in globalStock) if(data[id] !== undefined) globalStock[id] = data[id];
@@ -348,6 +358,16 @@
                 updateUI();
             }, error => {
                 hasCloud = false; 
+            });
+
+            // قراءة الأسعار الحية
+            db.collection('inventory').doc('prices').onSnapshot(snapshot => {
+                if (snapshot.exists) {
+                    const data = snapshot.data();
+                    for(let id in globalPrices) if(data[id] !== undefined) globalPrices[id] = data[id];
+                }
+                renderProducts(); 
+                updateUI();
             });
         }
 
@@ -407,11 +427,15 @@
 
             if(!container || !extrasContainer) return;
 
+            // تحديث البيانات الحية داخل الكروت الموجودة بالفعل بدون إعادة رسم لعدم تشتيت المستخدم
             if (container.children.length > 0 && !container.innerHTML.includes('جاري')) {
                 Object.keys(productsInfo).forEach(id => {
                     const available = getAvailableStock(id);
                     const stockDisplay = document.getElementById(`stock-display-${id}`);
+                    const priceDisplay = document.getElementById(`price-display-${id}`);
+                    
                     if(stockDisplay) stockDisplay.innerText = available; 
+                    if(priceDisplay) priceDisplay.innerText = globalPrices[id]; 
 
                     const actionContainer = document.getElementById(`card-action-${id}`);
                     if(actionContainer) actionContainer.innerHTML = window.getCardActionHTML(id);
@@ -425,6 +449,7 @@
             Object.keys(productsInfo).forEach(id => {
                 const item = productsInfo[id];
                 const available = getAvailableStock(id);
+                const currentPrice = globalPrices[id];
                 const stockBadgeClass = available <= 10 ? (available === 0 ? 'bg-red-50 text-red-600' : 'bg-orange-50 text-orange-600') : 'bg-green-50 text-green-700';
 
                 const cardHtml = `
@@ -433,7 +458,7 @@
                         <div>
                             <h3 class="text-sm md:text-base font-black text-brand-navy truncate mb-1">${item.name}</h3>
                             <div class="flex items-center gap-2 mb-1">
-                                <span class="font-black text-brand-cyanDark text-lg">${item.price} <span class="text-[10px] text-gray-400">ج.م</span></span>
+                                <span class="font-black text-brand-cyanDark text-lg"><span id="price-display-${id}">${currentPrice}</span> <span class="text-[10px] text-gray-400">ج.م</span></span>
                                 <span class="bg-gray-50 text-gray-500 text-[10px] px-1.5 py-0.5 rounded border border-gray-200 font-bold whitespace-nowrap">
                                     <i class="fa-solid fa-scale-balanced mr-1"></i> ${item.weight}
                                 </span>
@@ -460,7 +485,7 @@
                     <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden flex flex-row items-center p-2.5 gap-3 h-[90px]">
                         <div class="flex-1 min-w-0">
                             <h4 class="font-black text-brand-navy text-xs sm:text-sm truncate">${item.name}</h4>
-                            <div class="text-brand-cyanDark font-black text-xs sm:text-sm mb-1">${item.price} ج <span class="text-[10px] text-gray-400 font-bold">/ ${item.weight}</span></div>
+                            <div class="text-brand-cyanDark font-black text-xs sm:text-sm mb-1"><span id="price-display-${id}">${currentPrice}</span> ج <span class="text-[10px] text-gray-400 font-bold">/ ${item.weight}</span></div>
                             <div id="stock-badge-${id}" class="text-[10px] font-bold px-1.5 py-0.5 rounded inline-flex border ${stockBadgeClass} shrink-0">
                                 المتاح: <span id="stock-display-${id}">${available}</span>
                             </div>
@@ -486,7 +511,8 @@
             if (cart[id]) {
                 cart[id].quantity++;
             } else {
-                cart[id] = { quantity: 1, price: productsInfo[id].price, name: productsInfo[id].name };
+                // نسجل السعر الحالي للطبق المضاف للسلة
+                cart[id] = { quantity: 1, price: globalPrices[id], name: productsInfo[id].name };
             }
             updateUI(); 
             renderProducts(); 
@@ -520,6 +546,9 @@
             cartItemsContainer.innerHTML = '';
 
             for (let id in cart) {
+                // تحديث سعر السلة في حالة إن السعر اتغير من الإدارة
+                cart[id].price = globalPrices[id];
+                
                 const item = cart[id];
                 totalItems += item.quantity;
                 subTotalPrice += item.quantity * item.price;
@@ -806,44 +835,72 @@
             if (document.getElementById('admin-pin').value === '1234') { closeAdminLogin(); openAdminDashboard(); }
             else showAlert("خطأ", "الرمز السري غير صحيح!");
         };
+
+        // دالة فتح لوحة التحكم مع خانات (الأسعار) و (المخزون)
         window.openAdminDashboard = function() {
             const container = document.getElementById('admin-inputs-container'); 
             if(!container) return;
             container.innerHTML = '';
+            
             Object.keys(productsInfo).forEach(id => {
                 container.innerHTML += `
-                    <div class="flex justify-between items-center bg-gray-50 p-3 rounded-xl border border-gray-200">
-                        <span class="font-bold text-brand-navy text-sm">${productsInfo[id].name}</span>
-                        <div class="flex items-center gap-2"><input type="number" id="admin-input-${id}" value="${globalStock[id]}" class="w-16 text-center border border-gray-300 rounded-lg p-1.5 font-black text-brand-cyanDark focus:border-brand-cyan outline-none"></div>
+                    <div class="flex flex-col bg-gray-50 p-4 rounded-xl border border-gray-200 shadow-sm">
+                        <span class="font-black text-brand-navy text-sm mb-3 border-b pb-2"><i class="fa-solid fa-tag text-brand-cyanDark"></i> ${productsInfo[id].name}</span>
+                        <div class="flex gap-4">
+                            <div class="flex-1">
+                                <label class="text-[11px] text-gray-500 font-bold block mb-1">السعر (ج.م)</label>
+                                <input type="number" id="admin-price-${id}" value="${globalPrices[id]}" class="w-full text-center border-2 border-gray-300 rounded-xl p-2 font-black text-brand-cyanDark focus:border-brand-cyan outline-none transition-colors">
+                            </div>
+                            <div class="flex-1">
+                                <label class="text-[11px] text-gray-500 font-bold block mb-1">العدد المتاح</label>
+                                <input type="number" id="admin-stock-${id}" value="${globalStock[id]}" class="w-full text-center border-2 border-gray-300 rounded-xl p-2 font-black text-brand-cyanDark focus:border-brand-cyan outline-none transition-colors">
+                            </div>
+                        </div>
                     </div>`;
             });
+
             const modal = document.getElementById('admin-dashboard-modal'); 
             modal.classList.remove('hidden');
             setTimeout(() => modal.classList.remove('opacity-0'), 10);
         };
+
         window.closeAdminDashboard = function() {
             const modal = document.getElementById('admin-dashboard-modal'); 
             if(!modal) return;
             modal.classList.add('opacity-0');
             setTimeout(() => modal.classList.add('hidden'), 300);
         };
+
+        // دالة الحفظ الذكية للأسعار والمخزون معاً
         window.saveStockToCloud = async function() {
             let newStockData = {};
+            let newPriceData = {};
+
             Object.keys(productsInfo).forEach(id => {
-                const val = parseInt(document.getElementById(`admin-input-${id}`).value);
-                newStockData[id] = isNaN(val) ? 0 : Math.max(0, val);
+                const stockVal = parseInt(document.getElementById(`admin-stock-${id}`).value);
+                const priceVal = parseInt(document.getElementById(`admin-price-${id}`).value);
+                
+                newStockData[id] = isNaN(stockVal) ? 0 : Math.max(0, stockVal);
+                newPriceData[id] = isNaN(priceVal) ? productsInfo[id].price : Math.max(0, priceVal);
             });
+
             if (hasCloud && db) {
                 try { 
-                    await db.collection('inventory').doc('stock').set(newStockData); 
+                    // حفظ الاتنين مع بعض في نفس اللحظة
+                    await Promise.all([
+                        db.collection('inventory').doc('stock').set(newStockData),
+                        db.collection('inventory').doc('prices').set(newPriceData)
+                    ]);
                     closeAdminDashboard(); 
-                    showAlert("تم بنجاح", "تم تحديث أرصدة المخزون وسيظهر للعملاء فوراً."); 
+                    showAlert("تم بنجاح", "تم تحديث الأسعار والمخزون وهتظهر للعملاء فوراً."); 
                 } 
                 catch(e) { showAlert("خطأ", "فشل التحديث. تأكد من الإنترنت."); }
             } else {
                 globalStock = newStockData;
+                globalPrices = newPriceData;
                 closeAdminDashboard();
                 renderProducts();
+                updateUI();
             }
         };
     </script>
